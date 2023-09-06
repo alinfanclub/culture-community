@@ -1,14 +1,13 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { logout, onUserStateChanged } from "@/app/api/firebase";
-import { use, useEffect, useState } from "react";
+
+import { logout } from "@/app/api/firebase";
+import { useState } from "react";
 import { User } from "firebase/auth";
 import LoginModal from "./LoginModal";
 import SignupModal from "./SignupModal";
 import { useAuthContext } from "@/app/context/FirebaseAuthContext";
 
 export default function HeaderUserStateComponent() {
-  const router = useRouter();
   const [userState, setUserState] = useState<User | null>(null);
   const [isLogin, setIsLogin] = useState<boolean>(false);
   const [isSignUp, setIsSignUp] = useState<boolean>(false);

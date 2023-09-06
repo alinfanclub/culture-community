@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { onUserStateChanged } from "../api/firebase";
 import { User } from "firebase/auth";
 
@@ -17,7 +11,7 @@ export const FirebaseAuthContext = createContext<{ user: User | null }>({
 export const FirebaseAuthProvider = ({ children }: any) => {
   const [user, setUser] = useState<User | null>(null); // Again, replace with exact user type if available
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     onUserStateChanged((user) => {
       setUser(user);
     });

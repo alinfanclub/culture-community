@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        <Script src={KAKAO_SDK_URL} strategy="afterInteractive" />
+        <Script src={KAKAO_SDK_URL} strategy="beforeInteractive" />
       </head>
       <body className={inter.className}>
         <FirebaseAuthProvider>

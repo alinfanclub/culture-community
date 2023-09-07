@@ -51,7 +51,13 @@ export default function SignupModal({
   };
 
   return (
-    <div className="flex items-center justify-center h-full">
+    <div className="flex flex-col items-center justify-center h-full gap-4">
+      <div className='w-full flex justify-center relative'>
+        <h1>Login</h1>
+        <button onClick={handleSignUpModalState} type="button" className='absolute right-0'>
+          X
+        </button>
+      </div>
       <form onSubmit={handleSignUp}>
         <div className="flex flex-col gap-4">
           <input
@@ -59,12 +65,14 @@ export default function SignupModal({
             placeholder="email"
             onChange={(e) => setEmail(e.target.value)}
             required
+            className='border border-neutral-300 p-2 rounded-md'
           />
           <input
             type="password"
             placeholder="password"
             onChange={(e) => setPassword(e.target.value)}
             required
+            className='border border-neutral-300 p-2 rounded-md'
           />
           <input
             type="text"
@@ -73,6 +81,7 @@ export default function SignupModal({
             placeholder="userName"
             onChange={(e) => setUserName(e.target.value)}
             required
+            className='border border-neutral-300 p-2 rounded-md'
           />
           <button
             type="submit"

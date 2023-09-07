@@ -15,7 +15,7 @@ export const FirebaseAuthProvider = ({ children }: any) => {
     onUserStateChanged((user) => {
       setUser(user);
     });
-  }, []);
+  }, [user]);
 
   return (
     <FirebaseAuthContext.Provider value={{ user }}>

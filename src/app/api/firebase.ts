@@ -53,7 +53,6 @@ export async function createUser(
     const user = userCredential.user;
 
     await updateProfile(user, { displayName: userName });
-
     return user; // 여기에서 user 객체를 반환합니다.
   } catch (error) {
     console.error("Error creating user:");
@@ -82,5 +81,6 @@ export async function loginUser(email: string, password: string) {
 export function onUserStateChanged(callback: (user: User | null) => void) {
   auth.onAuthStateChanged((user) => {
     callback(user);
+    console.log(user);
   });
 }

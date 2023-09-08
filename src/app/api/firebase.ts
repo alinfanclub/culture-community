@@ -10,6 +10,8 @@ import {
   User,
   signInWithEmailAndPassword,
 } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { setUserData } from "./fireStore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
@@ -53,6 +55,7 @@ export async function createUser(
     const user = userCredential.user;
 
     await updateProfile(user, { displayName: userName });
+    await setUserData(user);
     return user; // 여기에서 user 객체를 반환합니다.
   } catch (error) {
     console.error("Error creating user:");
@@ -84,3 +87,5 @@ export function onUserStateChanged(callback: (user: User | null) => void) {
     console.log(user);
   });
 }
+
+export const db = getFirestore(app);

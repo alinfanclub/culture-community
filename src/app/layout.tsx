@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import Link from "next/link";
 import { FirebaseAuthProvider } from "./context/FirebaseAuthContext";
 import Script from "next/script";
+import ReactQueryProvider from "./provider/ReactQueryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,7 +15,6 @@ export const metadata: Metadata = {
 };
 
 const KAKAO_SDK_URL = `//dapi.kakao.com/v2/maps/sdk.js?appkey=3e1a77f956eae1e9dd319a03071ce091&autoload=false`;
-
 export default function RootLayout({
   children,
 }: {
@@ -27,15 +27,18 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <FirebaseAuthProvider>
-          <header className="flex justify-between">
-            <h1>Deo Web</h1>
-            <nav className="flex gap-4">
-              <Link href="/">Home</Link>
+          <header className="flex justify-between p-2 items-center">
+            <h1>
+              <Link href="/">Deo Web</Link>
+            </h1>
+            <nav className="flex gap-4 items-center">
               <Link href="/cultureinfo">CultureInfo</Link>
               <HeaderUserStateComponent />
             </nav>
           </header>
-          <div className="grow">{children}</div>
+          <div className="grow">
+            <ReactQueryProvider>{children}</ReactQueryProvider>
+          </div>
         </FirebaseAuthProvider>
       </body>
     </html>

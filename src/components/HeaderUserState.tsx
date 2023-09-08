@@ -6,6 +6,9 @@ import { User } from "firebase/auth";
 import LoginModal from "./LoginModal";
 import SignupModal from "./SignupModal";
 import { useAuthContext } from "@/app/context/FirebaseAuthContext";
+import Link from "next/link";
+import Avvvatars from "avvvatars-react";
+import Image from "next/image";
 
 export default function HeaderUserStateComponent() {
   const [userState, setUserState] = useState<User | null>(null);
@@ -30,11 +33,22 @@ export default function HeaderUserStateComponent() {
         </div>
       )}
       {user && (
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center">
+          {user.photoURL ? (
+            <Image
+              src={user.photoURL}
+              alt="userImage"
+              width={500}
+              height={500}
+            />
+          ) : (
+            <Avvvatars value="user.displayName" style="shape" />
+          )}
           <h1>{user.displayName}</h1>
           <button type="button" onClick={() => logout()}>
             로그아웃
           </button>
+          <Link href="/mypage">마이페이지</Link>
         </div>
       )}
       {isLogin || isSignUp ? (

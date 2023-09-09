@@ -23,13 +23,6 @@ export default function UserSpaceArea() {
     onSuccess: () => queryClient.invalidateQueries(["spaceArea"]),
   });
 
-  useEffect(() => {
-    if (!user) {
-      router.push("/");
-      alert("로그인이 필요합니다.");
-    }
-  }, [router, user]);
-
   const handleMakeSpace = async () => {
     const spaceName = prompt("스페이스 이름을 입력하세요", "");
     try {

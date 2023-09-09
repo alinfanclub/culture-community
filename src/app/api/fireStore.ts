@@ -1,5 +1,7 @@
 import { User, getAuth } from "firebase/auth";
 import {
+  DocumentData,
+  QuerySnapshot,
   collection,
   deleteDoc,
   doc,
@@ -14,7 +16,7 @@ import { db } from "./firebase";
 import axios from "axios";
 import { log } from "console";
 
-export async function setUserData(user: User) {
+export async function setUserData(user: User): Promise<void> {
   await setDoc(doc(db, "account", user.uid), {
     email: user.email,
     displayName: user.displayName,
@@ -23,7 +25,7 @@ export async function setUserData(user: User) {
   });
 }
 
-export async function getUserDate(user: User) {
+export async function getUserDate(user: User): Promise<DocumentData> {
   const q = query(
     collection(db, "account"),
     where("username", "==", user.email)
@@ -34,30 +36,30 @@ export async function getUserDate(user: User) {
     // doc.data() is never undefined for query doc snapshots
     console.log(doc.id, " =>", doc.data());
   });
+  return querySnapshot.docs[0].data();
 }
 
-export async function getSpaceData() {
+export async function getSpaceData(): Promise<DocumentData[]> {
   const user = getAuth().currentUser;
   const q = query(collection(db, "spaces"), where("Useruid", "==", user?.uid));
 
   const querySnapshot = await getDocs(q);
-  let data: any[] = [];
+  let data: DocumentData[] = [];
   querySnapshot.forEach((doc) => {
     data.push(doc.data());
   });
   return data;
 }
-export async function getSpaceDataDetail(param: string) {
+export async function getSpaceDataDetail(param: string): Promise<DocumentData> {
   const q = query(collection(db, "spaces"), where("spaceId", "==", param));
   const querySnapshot = await getDocs(q);
-  let data;
+  let data: DocumentData = {};
   querySnapshot.forEach((doc) => {
     data = Object(doc.data());
   });
-  console.log(data);
   return data;
 }
-export async function makeSpace(spaceName: string) {
+export async function makeSpace(spaceName: string): Promise<string> {
   const spaceId = uuidv1();
   const user = getAuth().currentUser;
   try {
@@ -81,7 +83,7 @@ export async function makeSpace(spaceName: string) {
   return spaceId;
 }
 
-const getImage = async () => {
+const getImage = async (): Promise<string> => {
   let state = "";
   await axios
     .get("https://api.unsplash.com/photos/random", {

@@ -9,17 +9,17 @@ import { useAuthContext } from "@/app/context/FirebaseAuthContext";
 import Link from "next/link";
 import Avvvatars from "avvvatars-react";
 import Image from "next/image";
+import ClipSpinner from "./common/ClipSpinner";
 
 export default function HeaderUserStateComponent() {
   const [userState, setUserState] = useState<User | null>(null);
   const [isLogin, setIsLogin] = useState<boolean>(false);
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
-  const { user } = useAuthContext();
+  const { user, loading } = useAuthContext();
 
   const handleLoginModalState = () => setIsLogin(!isLogin);
   const handleSignUpModalState = () => setIsSignUp(!isSignUp);
   const handleSetUser = (user: User) => setUserState(user);
-
   return (
     <div>
       {!user && (
@@ -34,6 +34,7 @@ export default function HeaderUserStateComponent() {
       )}
       {user && (
         <div className="flex gap-4 items-center">
+          <Link href="/mypage">마이페이지</Link>
           {user.photoURL ? (
             <Image
               src={user.photoURL}
@@ -48,7 +49,6 @@ export default function HeaderUserStateComponent() {
           <button type="button" onClick={() => logout()}>
             로그아웃
           </button>
-          <Link href="/mypage">마이페이지</Link>
         </div>
       )}
       {isLogin || isSignUp ? (

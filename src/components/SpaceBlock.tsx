@@ -4,9 +4,10 @@ import { deleteSpace } from "@/app/api/fireStore";
 import { spaceAreaType } from "@/app/types/mySpaceType";
 import { timeStampFormat } from "@/app/util/timeStampFormat";
 import { formatAgo } from "@/app/util/timeago";
+import { DocumentData } from "firebase/firestore";
 import Image from "next/image";
 
-export default function SpaceBlock({ data }: spaceAreaType, { index }: any) {
+export default function SpaceBlock({ data }: DocumentData, { index }: any) {
   const time = timeStampFormat(data.createdAt);
 
   const handleSpaceDelete = () => {
@@ -27,7 +28,7 @@ export default function SpaceBlock({ data }: spaceAreaType, { index }: any) {
           />
         </div>
       </a>
-      <div className="flex flex justify-between">
+      <div className="flex justify-between">
         <div>
           <a href={`/mypage/${data.spaceId}`} target="_blank">
             <h1>{data.title}</h1>

@@ -4,21 +4,45 @@ import { getSpaceData, makeSpace } from "@/app/api/fireStore";
 import UserWelcomMsg from "./UserWelcomMsg";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import SpaceBlock from "./SpaceBlock";
+import ClipSpinner from "./common/ClipSpinner";
+import { use, useEffect, useState } from "react";
+import { useAuthContext } from "@/app/context/FirebaseAuthContext";
+import { useRouter } from "next/navigation";
 export default function UserSpaceArea() {
   const queryClient = useQueryClient();
+  const [customLoading, setCustomLoading] = useState(false);
+  const { user } = useAuthContext();
+  const router = useRouter();
 
-  const uploadNewPost = useMutation(
-    ({ spaceName }: { spaceName: string }) => makeSpace(spaceName),
-    {
-      onSuccess: () => queryClient.invalidateQueries(["spaceArea"]),
+  const uploadNewPost = useMutation<
+    string,
+    Error,
+    { spaceName: string },
+    unknown
+  >(({ spaceName }: { spaceName: string }) => makeSpace(spaceName), {
+    onSuccess: () => queryClient.invalidateQueries(["spaceArea"]),
+  });
+
+  useEffect(() => {
+    if (!user) {
+      router.push("/");
+      alert("로그인이 필요합니다.");
     }
-  );
+  }, [router, user]);
 
   const handleMakeSpace = async () => {
     const spaceName = prompt("스페이스 이름을 입력하세요", "");
     try {
+      setCustomLoading(true);
       spaceName
-        ? uploadNewPost.mutate({ spaceName })
+        ? uploadNewPost.mutate(
+            { spaceName },
+            {
+              onSuccess() {
+                setCustomLoading(false);
+              },
+            }
+          )
         : alert("스페이스 이름을 입력하세요");
     } catch (error) {
       console.log(error);
@@ -26,7 +50,7 @@ export default function UserSpaceArea() {
   };
 
   const {
-    data: spaceArea,
+    data: spaceArea = [],
     isLoading,
     isError,
   } = useQuery({
@@ -34,7 +58,7 @@ export default function UserSpaceArea() {
     queryFn: () => getSpaceData(),
   });
 
-  if (isLoading) return <div>loading</div>;
+  if (isLoading || customLoading) return <ClipSpinner color="#fff" />;
   if (isError) return <div>error</div>;
 
   return (
@@ -47,8 +71,10 @@ export default function UserSpaceArea() {
       </div>
       <div className="flex gap-4 py-2">
         {spaceArea
-          ?.sort((a, b) => b.createdAt - a.createdAt)
-          .map((data, index) => <SpaceBlock data={data} key={index} />)}
+          .sort((a, b) => b.createdAt - a.createdAt)
+          .map((data, index) => (
+            <SpaceBlock data={data} key={index} />
+          ))}
         <button
           type="button"
           onClick={() => handleMakeSpace()}

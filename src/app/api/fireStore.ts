@@ -1,6 +1,7 @@
 import { User, getAuth } from "firebase/auth";
 import {
   collection,
+  deleteDoc,
   doc,
   getDocs,
   query,
@@ -46,7 +47,16 @@ export async function getSpaceData() {
   });
   return data;
 }
-
+export async function getSpaceDataDetail(param: string) {
+  const q = query(collection(db, "spaces"), where("spaceId", "==", param));
+  const querySnapshot = await getDocs(q);
+  let data;
+  querySnapshot.forEach((doc) => {
+    data = Object(doc.data());
+  });
+  console.log(data);
+  return data;
+}
 export async function makeSpace(spaceName: string) {
   const spaceId = uuidv1();
   const user = getAuth().currentUser;
@@ -76,9 +86,10 @@ const getImage = async () => {
   await axios
     .get("https://api.unsplash.com/photos/random", {
       params: {
-        client_id: "tYO9BazFMVJZY6ZN_A2t2EKFFQbGvD5-3HiskuUZN_w",
-        category: "background",
+        client_id: process.env.NEXT_PUBLIC_UNSPLASH_CLIENTID,
+        query: "wave",
         count: 1,
+        fit: "clamp",
       },
     })
     .then((res) => {
@@ -87,3 +98,7 @@ const getImage = async () => {
     });
   return state;
 };
+
+export async function deleteSpace(spaceId: string) {
+  await deleteDoc(doc(db, "spaces", spaceId));
+}

@@ -5,7 +5,7 @@ export default function MyPageLayout({
 }) {
   return (
     <div className="flex flex-col w-full h-full">
-      <div className="flex-grow px-2 bg-black">{children}</div>
+      <div className="flex-grow  bg-zinc-900">{children}</div>
     </div>
   );
 }

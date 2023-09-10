@@ -1,7 +1,6 @@
 import { User, getAuth } from "firebase/auth";
 import {
   DocumentData,
-  QuerySnapshot,
   collection,
   deleteDoc,
   doc,
@@ -9,12 +8,21 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { v1 as uuidv1 } from "uuid";
 import { db } from "./firebase";
 import axios from "axios";
-import { log } from "console";
+import {
+  deleteObject,
+  getDownloadURL,
+  getMetadata,
+  getStorage,
+  ref,
+  uploadBytes,
+  uploadString,
+} from "firebase/storage";
 
 export async function setUserData(user: User): Promise<void> {
   await setDoc(doc(db, "account", user.uid), {
@@ -103,4 +111,33 @@ const getImage = async (): Promise<string> => {
 
 export async function deleteSpace(spaceId: string) {
   await deleteDoc(doc(db, "spaces", spaceId));
+}
+
+export async function userSpaceBgUpdate(file: any, spaceId: any) {
+  const storage = getStorage();
+  const fileRef = ref(storage, uuidv1());
+  try {
+    await uploadBytes(fileRef, file[0]).then((snapshot) => {
+      const reportRef = doc(db, "spaces", spaceId);
+      getDownloadURL(snapshot.ref).then((metadata) => {
+        updateDoc(reportRef, {
+          backgroundImage: metadata,
+        });
+      });
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function deleteOldImage(oldImageUrl: string) {
+  const storage = getStorage();
+  const imageRef = ref(storage, oldImageUrl);
+
+  try {
+    await deleteObject(imageRef);
+    console.log("기존 이미지 삭제 성공");
+  } catch (error) {
+    console.error("기존 이미지 삭제 오류:", error);
+  }
 }

@@ -6,6 +6,7 @@ import { timeStampFormat } from "@/app/util/timeStampFormat";
 import { formatAgo } from "@/app/util/timeago";
 import { DocumentData } from "firebase/firestore";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function SpaceBlock({ data }: DocumentData, { index }: any) {
   const time = timeStampFormat(data.createdAt);
@@ -17,7 +18,7 @@ export default function SpaceBlock({ data }: DocumentData, { index }: any) {
   };
   return (
     <article key={index} className="w-60 rounded-2xl text-white">
-      <a href={`/mypage/${data.spaceId}`} target="_blank">
+      <Link href={`/mypage/myspace/${data.spaceId}`}>
         <div className="rounded-lg max-w-full image-thumbnail-crop-frame overflow-hidden flex items-center justify-center aspect-[4/2]">
           <Image
             src={data.backgroundImage}
@@ -27,12 +28,12 @@ export default function SpaceBlock({ data }: DocumentData, { index }: any) {
             className="rounded-br-[30%] h-full w-full object-cover"
           />
         </div>
-      </a>
+      </Link>
       <div className="flex justify-between">
         <div>
-          <a href={`/mypage/${data.spaceId}`} target="_blank">
+          <Link href={`/mypage/myspace/${data.spaceId}`}>
             <h1>{data.title}</h1>
-          </a>
+          </Link>
           <div className="flex gap-2 items-center">
             <small>{data.userInfos.displayName}</small>
             <span>-</span>

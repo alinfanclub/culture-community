@@ -8,10 +8,12 @@ import ClipSpinner from "./common/ClipSpinner";
 import { use, useEffect, useState } from "react";
 import { useAuthContext } from "@/app/context/FirebaseAuthContext";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+
 export default function UserSpaceArea() {
   const queryClient = useQueryClient();
   const [customLoading, setCustomLoading] = useState(false);
-  const { user } = useAuthContext();
+  const { user, userToken } = useAuthContext();
   const router = useRouter();
 
   const uploadNewPost = useMutation<
@@ -34,9 +36,12 @@ export default function UserSpaceArea() {
               onSuccess() {
                 setCustomLoading(false);
               },
+              onError() {
+                setCustomLoading(false);
+              },
             }
           )
-        : alert("스페이스 이름을 입력하세요");
+        : (alert("스페이스 이름을 입력해주세요"), setCustomLoading(false));
     } catch (error) {
       console.log(error);
     }
@@ -50,6 +55,14 @@ export default function UserSpaceArea() {
     queryKey: ["spaceArea"],
     queryFn: () => getSpaceData(),
   });
+
+  useEffect(() => {
+    const authToken = Cookies.get("authToken");
+
+    if (!authToken && authToken !== userToken) {
+      router.push("/"); // 쿠키가 없거나 로그인 상태가 아니면 메인 페이지로 리다이렉트
+    }
+  }, [router, user, userToken]);
 
   if (isLoading || customLoading) return <ClipSpinner color="#fff" />;
   if (isError) return <div>error</div>;

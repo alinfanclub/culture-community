@@ -10,16 +10,21 @@ import Link from "next/link";
 import Avvvatars from "avvvatars-react";
 import Image from "next/image";
 import ClipSpinner from "./common/ClipSpinner";
+import { useRouter } from "next/navigation";
 
 export default function HeaderUserStateComponent() {
   const [userState, setUserState] = useState<User | null>(null);
   const [isLogin, setIsLogin] = useState<boolean>(false);
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
-  const { user, loading } = useAuthContext();
-
+  const { user } = useAuthContext();
+  const router = useRouter();
   const handleLoginModalState = () => setIsLogin(!isLogin);
   const handleSignUpModalState = () => setIsSignUp(!isSignUp);
   const handleSetUser = (user: User) => setUserState(user);
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
   return (
     <div>
       {!user && (
@@ -46,7 +51,7 @@ export default function HeaderUserStateComponent() {
             <Avvvatars value="user.displayName" style="shape" />
           )}
           <h1>{user.displayName}</h1>
-          <button type="button" onClick={() => logout()}>
+          <button type="button" onClick={handleLogout}>
             로그아웃
           </button>
         </div>

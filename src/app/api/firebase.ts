@@ -12,6 +12,7 @@ import {
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { setUserData } from "./fireStore";
+import Cookies from "js-cookie";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
@@ -33,11 +34,6 @@ export function loginGoogle() {
     const errorMessage = error.message;
     console.log(errorMessage);
   });
-}
-
-export async function logout() {
-  await signOut(auth);
-  return null;
 }
 
 // ~ 유저 생성
@@ -63,6 +59,13 @@ export async function createUser(
   }
 }
 
+// ~ 유저 로그아웃
+export async function logout() {
+  await signOut(auth);
+  Cookies.remove("authToken");
+  return null;
+}
+
 //  ~ 유저 로그인
 export async function loginUser(email: string, password: string) {
   try {
@@ -72,6 +75,8 @@ export async function loginUser(email: string, password: string) {
       password
     );
     if (userCredential.user) {
+      const authToken = await userCredential.user.getIdToken();
+      Cookies.set("authToken", authToken); // 쿠키에 토큰 저장
       return userCredential.user;
     }
   } catch (error) {
@@ -82,9 +87,16 @@ export async function loginUser(email: string, password: string) {
 
 // ~ 유저 상태관리 확인
 export function onUserStateChanged(callback: (user: User | null) => void) {
-  auth.onAuthStateChanged((user) => {
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      const authToken = await user.getIdToken();
+      Cookies.set("authToken", authToken); // 로그인 시 쿠키 설정
+    } else {
+      Cookies.remove("authToken"); // 로그아웃 시 쿠키 제거
+    }
+    const currentUserToken = Cookies.get("authToken");
     callback(user);
-    console.log(user);
+    return currentUserToken;
   });
 }
 

@@ -1,3 +1,3 @@
-export default function WritePage() {
+export default function MyWritePage() {
   return <div>write</div>;
 }

@@ -67,17 +67,21 @@ export default function MypageSpaceDetail() {
 
   useEffect(() => {
     const authToken = Cookies.get("authToken");
-    user
-      ?.getIdToken()
-      .then((data) => {
-        setUserTokenCustom(data);
-      })
-      .then(() => {
-        if (authToken == userTokenCustom) {
-          router.push("/"); // 쿠키가 없거나 로그인 상태가 아니면 메인 페이지로 리다이렉트
-        }
-      });
-  }, [router, user, userTokenCustom]);
+    // console.log(authToken);
+    // user?.getIdToken().then((data) => {
+    //   console.log(data);
+    //   if (authToken === undefined) {
+    //     router.push("/");
+    //     console.log("redirect");
+    //   }
+    // });
+    if (authToken === undefined) {
+      router.push("/");
+      console.log("redirect");
+      alert("로그인이 필요합니다.");
+    }
+    console.log("error");
+  }, [router, user]);
 
   if (isLoading) return <div>loading</div>;
   if (isError) return <div>error</div>;

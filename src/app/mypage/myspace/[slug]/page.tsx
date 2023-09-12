@@ -3,6 +3,7 @@
 import {
   deleteOldImage,
   getSpaceDataDetail,
+  getSpacePostList,
   userSpaceBgUpdate,
 } from "@/app/api/fireStore";
 import { useAuthContext } from "@/app/context/FirebaseAuthContext";
@@ -15,6 +16,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import Cookies from "js-cookie";
+import { DocumentData } from "firebase/firestore";
 
 export default function MypageSpaceDetail() {
   const queryClient = useQueryClient();
@@ -65,6 +67,15 @@ export default function MypageSpaceDetail() {
     queryFn: () => getSpaceDataDetail(param.toString()),
   });
 
+  const {
+    data: spacePostList = [],
+    isLoading: spacePostListLoading,
+    isError: spacePostListError,
+  } = useQuery({
+    queryKey: ["spacePostList"],
+    queryFn: () => getSpacePostList(param.toString()),
+  });
+
   useEffect(() => {
     const authToken = Cookies.get("authToken");
     // console.log(authToken);
@@ -80,11 +91,10 @@ export default function MypageSpaceDetail() {
       console.log("redirect");
       alert("로그인이 필요합니다.");
     }
-    console.log("error");
   }, [router, user]);
 
-  if (isLoading) return <div>loading</div>;
-  if (isError) return <div>error</div>;
+  if (isLoading || spacePostListLoading) return <div>loading</div>;
+  if (isError || spacePostListError) return <div>error</div>;
 
   return (
     spaceArea && (
@@ -123,8 +133,29 @@ export default function MypageSpaceDetail() {
                 <small>{formatAgo(timeStampFormat(spaceArea.createdAt))}</small>
               </div>
             </div>
-            <Link href={`/mypage/write`}>글작성</Link>
+            <Link
+              href={{
+                pathname: "/mypage/[slug]",
+                query: { slug: param },
+              }}
+              as={`/mypage/${param}`}
+            >
+              글작성
+            </Link>
           </div>
+        </article>
+        <article id="">
+          {spacePostList.map((data, index) => (
+            <div key={index} className="w-40 bg-white aspect-[1/4 text-black">
+              <Image
+                src={data.backgroundImage}
+                alt="postImage"
+                width={500}
+                height={500}
+              />
+              {data.title}
+            </div>
+          ))}
         </article>
       </section>
     )

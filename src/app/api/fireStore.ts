@@ -33,6 +33,7 @@ export async function setUserData(user: User): Promise<void> {
   });
 }
 
+// ~ 유저 정보 가져오기
 export async function getUserDate(user: User): Promise<DocumentData> {
   const q = query(
     collection(db, "account"),
@@ -47,6 +48,7 @@ export async function getUserDate(user: User): Promise<DocumentData> {
   return querySnapshot.docs[0].data();
 }
 
+// ~ 스페이스 데이터 리스트 가져오기
 export async function getSpaceData(): Promise<DocumentData[]> {
   const user = getAuth().currentUser;
   const q = query(collection(db, "spaces"), where("Useruid", "==", user?.uid));
@@ -58,6 +60,8 @@ export async function getSpaceData(): Promise<DocumentData[]> {
   });
   return data;
 }
+
+// ~ 스페이스 데이터 디테일 가져오기
 export async function getSpaceDataDetail(param: string): Promise<DocumentData> {
   const q = query(collection(db, "spaces"), where("spaceId", "==", param));
   const querySnapshot = await getDocs(q);
@@ -67,6 +71,8 @@ export async function getSpaceDataDetail(param: string): Promise<DocumentData> {
   });
   return data;
 }
+
+//  ~ 스페이스 생성
 export async function makeSpace(spaceName: string): Promise<string> {
   const spaceId = uuidv1();
   const user = getAuth().currentUser;
@@ -91,6 +97,7 @@ export async function makeSpace(spaceName: string): Promise<string> {
   return spaceId;
 }
 
+// ~ 스페이스 생성시 언스프래쉬에서 랜덤 이미지 가져오기
 const getImage = async (): Promise<string> => {
   let state = "";
   await axios
@@ -109,10 +116,12 @@ const getImage = async (): Promise<string> => {
   return state;
 };
 
+// ~ 스페이스 삭제
 export async function deleteSpace(spaceId: string) {
   await deleteDoc(doc(db, "spaces", spaceId));
 }
 
+// ~ 스페이스 수정
 export async function userSpaceBgUpdate(file: any, spaceId: any) {
   const storage = getStorage();
   const fileRef = ref(storage, uuidv1());
@@ -130,6 +139,7 @@ export async function userSpaceBgUpdate(file: any, spaceId: any) {
   }
 }
 
+// ~ 스페이스에서 이미지 수정시 기존의 이미지 삭제 하기
 export async function deleteOldImage(oldImageUrl: string) {
   const storage = getStorage();
   const imageRef = ref(storage, oldImageUrl);
@@ -140,4 +150,49 @@ export async function deleteOldImage(oldImageUrl: string) {
   } catch (error) {
     console.error("기존 이미지 삭제 오류:", error);
   }
+}
+
+//  ~ 글 작성하기
+export async function createPost(
+  title: string,
+  name: string,
+  content: string,
+  spaceId: string
+) {
+  const postId = uuidv1();
+  const user = getAuth().currentUser;
+  try {
+    user &&
+      (await setDoc(doc(db, "posts", postId), {
+        createdAt: serverTimestamp(),
+        title: title,
+        author: name,
+        content: content,
+        userInfos: {
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+        },
+        postId: postId,
+        hostSpaceId: spaceId,
+        Useruid: user.uid,
+        fix: false,
+        backgroundImage: (await getImage()).toString(),
+      }));
+  } catch (error) {
+    console.log(error);
+  }
+
+  return postId;
+}
+
+export async function getSpacePostList(
+  postId: string
+): Promise<DocumentData[]> {
+  const q = query(collection(db, "posts"), where("hostSpaceId", "==", postId));
+  const querySnapshot = await getDocs(q);
+  let postlist: DocumentData[] = [];
+  querySnapshot.forEach((doc) => {
+    postlist.push(doc.data());
+  });
+  return postlist;
 }

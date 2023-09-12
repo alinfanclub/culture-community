@@ -6,6 +6,7 @@ import Link from "next/link";
 import { FirebaseAuthProvider } from "./context/FirebaseAuthContext";
 import Script from "next/script";
 import ReactQueryProvider from "./provider/ReactQueryProvider";
+import "react-quill/dist/quill.snow.css";
 
 const inter = Inter({ subsets: ["latin"] });
 

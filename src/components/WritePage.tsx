@@ -2,14 +2,16 @@
 
 import { createPost } from "@/app/api/fireStore";
 import dynamic from "next/dynamic";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 const QuillEditor = dynamic(() => import("@/components/QuillEditor"), {
   ssr: false,
 });
 
 export default function WritePage() {
+  const router = useRouter();
   const [html, setHtml] = useState("");
+  const [imgQuery, setImgQuery] = useState<string | null>("");
   const [postInfo, setPostInfo] = useState({
     title: "",
     name: "",
@@ -35,7 +37,15 @@ export default function WritePage() {
     console.log(html);
     try {
       if (html) {
-        await createPost(postInfo.title, postInfo.name, html, param.toString());
+        await createPost(
+          postInfo.title,
+          postInfo.name,
+          html,
+          param.toString(),
+          imgQuery ? imgQuery : "wave"
+        ).then(() => {
+          router.push(`/mypage/myspace/${param}`);
+        });
       } else {
         alert("내용을 입력해주세요");
       }
@@ -66,6 +76,21 @@ export default function WritePage() {
             onChange={handleChange}
             className="bg-black border-white border"
             required
+          />
+        </label>
+        <label htmlFor="">
+          <div className="flex gap-2 items-end">
+            <p>랜덤 이미지 단어</p>
+            <small>
+              {"단어를 입력해주세요 ex) 고양이 | 강아지 | 파도 | 사랑 | 이별"}
+            </small>
+          </div>
+          <input
+            type="text"
+            placeholder="기본 값은 파도 입니다."
+            name="imgQuery"
+            onChange={(e) => setImgQuery(e.target.value)}
+            className="bg-black border-white border"
           />
         </label>
         <QuillEditor handleHtmlChange={handleHtmlChange} html={html} />

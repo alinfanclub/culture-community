@@ -5,6 +5,9 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  limit,
+  or,
+  orderBy,
   query,
   serverTimestamp,
   setDoc,
@@ -116,6 +119,24 @@ const getImage = async (): Promise<string> => {
   return state;
 };
 
+const getImageByQuery = async (query: string): Promise<string> => {
+  let state = "";
+  await axios
+    .get("https://api.unsplash.com/photos/random", {
+      params: {
+        client_id: process.env.NEXT_PUBLIC_UNSPLASH_CLIENTID,
+        query: query || "wave",
+        count: 1,
+        fit: "clamp",
+      },
+    })
+    .then((res) => {
+      state = res.data[0].urls.regular;
+      return state;
+    });
+  return state;
+};
+
 // ~ 스페이스 삭제
 export async function deleteSpace(spaceId: string) {
   await deleteDoc(doc(db, "spaces", spaceId));
@@ -157,8 +178,9 @@ export async function createPost(
   title: string,
   name: string,
   content: string,
-  spaceId: string
-) {
+  spaceId: string,
+  imgQuery?: string
+): Promise<string> {
   const postId = uuidv1();
   const user = getAuth().currentUser;
   try {
@@ -176,7 +198,9 @@ export async function createPost(
         hostSpaceId: spaceId,
         Useruid: user.uid,
         fix: false,
-        backgroundImage: (await getImage()).toString(),
+        backgroundImage: (
+          await getImageByQuery(imgQuery ? imgQuery : "wave")
+        ).toString(),
       }));
   } catch (error) {
     console.log(error);
@@ -188,7 +212,11 @@ export async function createPost(
 export async function getSpacePostList(
   postId: string
 ): Promise<DocumentData[]> {
-  const q = query(collection(db, "posts"), where("hostSpaceId", "==", postId));
+  const q = query(
+    collection(db, "posts"),
+    where("hostSpaceId", "==", postId),
+    orderBy("createdAt")
+  );
   const querySnapshot = await getDocs(q);
   let postlist: DocumentData[] = [];
   querySnapshot.forEach((doc) => {

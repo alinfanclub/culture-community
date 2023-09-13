@@ -7,39 +7,43 @@ import { formatAgo } from "@/app/util/timeago";
 import { DocumentData } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
-
-export default function SpaceBlock({ data }: DocumentData, { index }: any) {
+type index = {
+  order: number;
+};
+export default function SpaceBlock({ data, order }: DocumentData & index) {
   const time = timeStampFormat(data.createdAt);
-
   const handleSpaceDelete = () => {
     if (confirm("스페이스를 삭제하시겠습니까?")) {
       deleteSpace(data.spaceId);
     }
   };
   return (
-    <article key={index} className="w-60 rounded-2xl text-white">
+    <article className="w-content text-white">
       <Link href={`/mypage/myspace/${data.spaceId}`}>
-        <div className="rounded-lg max-w-full image-thumbnail-crop-frame overflow-hidden flex items-center justify-center aspect-[4/2]">
+        <div className={`w-40 bg-white aspect-[1/1.5] text-black relative p-6`}>
           <Image
             src={data.backgroundImage}
-            alt="spaceImage"
+            alt="postImage"
             width={500}
             height={500}
-            className="rounded-br-[30%] h-full w-full object-cover"
+            className="aspect-[1/1.5] object-cover object-center absolute top-0 left-0 z-[0]"
           />
-        </div>
-      </Link>
-      <div className="flex justify-between">
-        <div>
-          <Link href={`/mypage/myspace/${data.spaceId}`}>
-            <h1>{data.title}</h1>
-          </Link>
-          <div className="flex gap-2 items-center">
-            <small>{data.userInfos.displayName}</small>
-            <span>-</span>
-            <small>{formatAgo(time)}</small>
+          <div className="z-10 w-[80%] h-[80%] bg-white absolute top-1/2 left-1/2  -translate-x-1/2 -translate-y-1/2 p-4">
+            <small className="text-right w-full block">
+              {" "}
+              {order < 10 ? "0" + (order + 1) : order + 1}
+            </small>
+            <h3>{data.title}</h3>
           </div>
         </div>
+      </Link>
+      <div className="flex justify-between items-center">
+        <div className="flex gap-2 items-center">
+          <small>{data.userInfos.displayName}</small>
+          <span>-</span>
+          <small>{formatAgo(time)}</small>
+        </div>
+
         <button type="button" onClick={handleSpaceDelete}>
           삭제
         </button>

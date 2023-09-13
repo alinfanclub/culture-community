@@ -98,9 +98,9 @@ export default function MypageSpaceDetail() {
 
   return (
     spaceArea && (
-      <section className="text-white w-[90%] mx-auto">
+      <section className="text-white w-[90%] mx-auto max-h-screen flex flex-col">
         <article
-          className={`w-full h-80  overflow-hidden relative flex justify-center items-center mx-auto bg-white`}
+          className={`w-full h-40  overflow-hidden relative flex justify-center items-center mx-auto bg-white`}
         >
           <Image
             key={spaceArea.backgroundImage}
@@ -144,16 +144,36 @@ export default function MypageSpaceDetail() {
             </Link>
           </div>
         </article>
-        <article id="">
+        <article
+          id=""
+          className="py-4 flex  gap-2 flex-col  h-full overflow-y-scroll grow w-fit pr-4 "
+        >
           {spacePostList.map((data, index) => (
-            <div key={index} className="w-40 bg-white aspect-[1/4 text-black">
-              <Image
-                src={data.backgroundImage}
-                alt="postImage"
-                width={500}
-                height={500}
-              />
-              {data.title}
+            <div key={index} className="w-60 rounded-2xl text-white ">
+              <Link href={`/mypage/myspace/${data.spaceId}`}>
+                <div className="rounded-lg max-w-full image-thumbnail-crop-frame overflow-hidden flex items-center justify-center aspect-[4/2]">
+                  <Image
+                    src={data.backgroundImage}
+                    alt="spaceImage"
+                    width={500}
+                    height={500}
+                    className="rounded-br-[30%] h-full w-full object-cover"
+                  />
+                </div>
+              </Link>
+              <div className="flex justify-between">
+                <div>
+                  <Link href={`/mypage/myspace/${data.spaceId}`}>
+                    <h1>{data.title}</h1>
+                  </Link>
+                  <div className="flex gap-2 items-center">
+                    <small>{data.userInfos.displayName}</small>
+                    <span>-</span>
+                    <small>{formatAgo(timeStampFormat(data.createdAt))}</small>
+                  </div>
+                </div>
+                <button type="button">삭제</button>
+              </div>
             </div>
           ))}
         </article>

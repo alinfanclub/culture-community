@@ -16,14 +16,12 @@ export default function UserSpaceArea() {
   const { user, userToken } = useAuthContext();
   const router = useRouter();
 
-  const uploadNewPost = useMutation<
-    string,
-    Error,
-    { spaceName: string },
-    unknown
-  >(({ spaceName }: { spaceName: string }) => makeSpace(spaceName), {
-    onSuccess: () => queryClient.invalidateQueries(["spaceArea"]),
-  });
+  const uploadNewPost = useMutation(
+    ({ spaceName }: { spaceName: string }) => makeSpace(spaceName),
+    {
+      onSuccess: () => queryClient.invalidateQueries(["spaceArea"]),
+    }
+  );
 
   const handleMakeSpace = async () => {
     const spaceName = prompt("스페이스 이름을 입력하세요", "");
@@ -79,7 +77,7 @@ export default function UserSpaceArea() {
         {spaceArea
           .sort((a, b) => b.createdAt - a.createdAt)
           .map((data, index) => (
-            <SpaceBlock data={data} key={index} />
+            <SpaceBlock data={data} key={index} order={index} />
           ))}
         <button
           type="button"

@@ -5,3 +5,16 @@
 body {
   @apply h-screen flex flex-col max-h-screen flex flex-col;
 }
+body *::-webkit-scrollbar {
+  width: 10px;
+}
+body *::-webkit-scrollbar-thumb {
+  background-color: gray;
+  border-radius: 10px;
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+body *::-webkit-scrollbar-track {
+  background-color: transparent;
+  border-radius: 10px;
+}

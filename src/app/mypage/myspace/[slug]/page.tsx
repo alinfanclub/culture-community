@@ -140,7 +140,7 @@ export default function MypageSpaceDetail() {
 
   return (
     spaceArea && (
-      <section className={`text-white w-[90%] mx-auto flex flex-col h-full`}>
+      <section className={`text-white w-[90%] mx-auto flex flex-col h-auto`}>
         {/* <article
           className={`w-full h-[10%] overflow-hidden relative flex justify-center items-center mx-auto bg-white`}
         >
@@ -187,10 +187,10 @@ export default function MypageSpaceDetail() {
             <button onClick={() => handleWirteState()}>글작성</button>
           </div>
         </article>
-        <article className="flex box-border py-2 grow h-[80%]">
+        <article className="flex box-border py-2 grow h-full">
           <div
             id=""
-            className="flex flex-col gap-2 overflow-y-scroll w-60 bg-[rgba(0,0,0,0.7)] h-full"
+            className="flex flex-col gap-2 overflow-y-scroll w-60 bg-[rgba(0,0,0,0.7)] h-[50vw] sticky top-0"
           >
             {spacePostList.map((data, index) => (
               <PostBlock
@@ -201,10 +201,10 @@ export default function MypageSpaceDetail() {
               />
             ))}
           </div>
-          <div className="bg-red grow px-4 h-full">
+          <div className="">
             {eachPost && isView && (
-              <div className="h-full flex flex-col">
-                <div className="h-[10%]">
+              <div className="">
+                <div className="">
                   <h1>{eachPost.title}</h1>
                   <div onClick={() => hadleDeletPost(eachPost.postId)}>
                     삭제

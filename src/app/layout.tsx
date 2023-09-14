@@ -37,7 +37,7 @@ export default function RootLayout({
               <HeaderUserStateComponent />
             </nav>
           </header>
-          <div className=" max-h-full h-calc-body">
+          <div className="h-calc-body">
             <ReactQueryProvider>{children}</ReactQueryProvider>
           </div>
         </FirebaseAuthProvider>

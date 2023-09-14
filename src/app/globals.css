@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply h-screen flex flex-col max-h-screen flex flex-col;
+  @apply h-screen flex flex-col flex flex-col;
 }
 body *::-webkit-scrollbar {
   width: 10px;
@@ -36,7 +36,7 @@ ql-snow *,
   flex-direction: column;
 }
 .custom-quill.quill {
-  height: 90%;
+  height: auto;
 }
 .ql-editor {
   height: 100%;

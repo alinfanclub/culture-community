@@ -2,6 +2,7 @@
 
 import {
   deleteOldImage,
+  deletePost,
   getSpaceDataDetail,
   getSpacePostList,
   userSpaceBgUpdate,
@@ -18,22 +19,32 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import Cookies from "js-cookie";
 import { DocumentData } from "firebase/firestore";
 import PostBlock from "@/components/PostBlock";
+import QuillViewer from "@/components/QuillViewer";
+import WritePage from "@/components/WritePage";
+import { set } from "firebase/database";
 
 export default function MypageSpaceDetail() {
   const queryClient = useQueryClient();
   const param = useParams().slug;
   const [customLoading, setCustomLoading] = useState(false);
-  const [userTokenCustom, setUserTokenCustom] = useState<string>("");
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [isDragging, setisDragging] = useState(false);
+  const [eachPost, setEachPost] = useState<DocumentData | null>();
   const { user } = useAuthContext();
   const router = useRouter();
+  const [isView, setIsView] = useState(false);
+  const [isCreate, setIsCreate] = useState(false);
 
   const uploadBgImage = useMutation(
     ({ file, param }: { file: any; param: string }) =>
       userSpaceBgUpdate(file, param),
     {
       onSuccess: () => queryClient.invalidateQueries(["spaceAreaDetail"]),
+    }
+  );
+
+  const deletePostMutation = useMutation(
+    ({ postId }: { postId: string }) => deletePost(postId),
+    {
+      onSuccess: () => queryClient.invalidateQueries(["spacePostList"]),
     }
   );
 
@@ -96,14 +107,42 @@ export default function MypageSpaceDetail() {
     }
   }, [router, user]);
 
+  const handleGetInex = (index: number) => {
+    setEachPost(spacePostList[index]);
+    setIsView(true);
+    setIsCreate(false);
+  };
+
+  const hadleDeletPost = (postId: string) => {
+    try {
+      window.confirm("삭제하시겠습니까?")
+        ? deletePostMutation.mutate(
+            { postId },
+            {
+              onSuccess: () => {
+                setEachPost(null);
+              },
+            }
+          )
+        : false;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleWirteState = () => {
+    setIsCreate(!isCreate);
+    setIsView(false);
+  };
+
   if (isLoading || spacePostListLoading) return <div>loading</div>;
   if (isError || spacePostListError) return <div>error</div>;
 
   return (
     spaceArea && (
-      <section className="text-white w-[90%] mx-auto flex flex-col h-full">
-        <article
-          className={`w-full h-40  overflow-hidden relative flex justify-center items-center mx-auto bg-white`}
+      <section className={`text-white w-[90%] mx-auto flex flex-col h-full`}>
+        {/* <article
+          className={`w-full h-[10%] overflow-hidden relative flex justify-center items-center mx-auto bg-white`}
         >
           <Image
             key={spaceArea.backgroundImage}
@@ -113,7 +152,7 @@ export default function MypageSpaceDetail() {
             height={1000}
             priority={true}
             loading="eager"
-            className="w-full h-full object-cover object-center z-[0] bg-white opacity-80"
+            className="w-full h-full object-cover object-center bg-white opacity-80"
           />
           <input
             type="file"
@@ -126,8 +165,8 @@ export default function MypageSpaceDetail() {
             사진변경
           </label>
           {customLoading && <ClipSpinner color="#fff" />}
-        </article>
-        <article id="spaceBody">
+        </article> */}
+        <article id="spaceBody" className="h-[10%]">
           <div className="flex items-center justify-between py-4 border-b-2 border-white">
             <div className="flex gap-4 items-end">
               <h1 className="text-3xl">{spaceArea.title}</h1>
@@ -136,7 +175,7 @@ export default function MypageSpaceDetail() {
                 <small>{formatAgo(timeStampFormat(spaceArea.createdAt))}</small>
               </div>
             </div>
-            <Link
+            {/* <Link
               href={{
                 pathname: "/mypage/[slug]",
                 query: { slug: param },
@@ -144,20 +183,39 @@ export default function MypageSpaceDetail() {
               as={`/mypage/${param}`}
             >
               글작성
-            </Link>
+            </Link> */}
+            <button onClick={() => handleWirteState()}>글작성</button>
           </div>
         </article>
-        <div className="flex h-full max-h-full">
-          <article
+        <article className="flex box-border py-2 grow h-[80%]">
+          <div
             id=""
-            className="py-4 flex flex-col gap-2 overflow-y-scroll w-fit h-full"
+            className="flex flex-col gap-2 overflow-y-scroll w-60 bg-[rgba(0,0,0,0.7)] h-full"
           >
             {spacePostList.map((data, index) => (
-              <PostBlock data={data} key={index} />
+              <PostBlock
+                data={data}
+                key={index}
+                order={index}
+                handleGetInex={handleGetInex}
+              />
             ))}
-          </article>
-          <div className="bg-red">1</div>
-        </div>
+          </div>
+          <div className="bg-red grow px-4 h-full">
+            {eachPost && isView && (
+              <div className="h-full flex flex-col">
+                <div className="h-[10%]">
+                  <h1>{eachPost.title}</h1>
+                  <div onClick={() => hadleDeletPost(eachPost.postId)}>
+                    삭제
+                  </div>
+                </div>
+                <QuillViewer html={eachPost.content} />
+              </div>
+            )}
+            {isCreate && <WritePage setIsCreate={setIsCreate} />}
+          </div>
+        </article>
       </section>
     )
   );

@@ -1,14 +1,17 @@
 "use client";
 
 import { createPost } from "@/app/api/fireStore";
-import dynamic from "next/dynamic";
+import QuillEditor from "@/components/QuillEditor";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-const QuillEditor = dynamic(() => import("@/components/QuillEditor"), {
-  ssr: false,
-});
+import { useMutation, useQueryClient } from "react-query";
+import("@/components/QuillEditor");
 
-export default function WritePage() {
+export default function WritePage({
+  setIsCreate,
+}: {
+  setIsCreate: (boolean: boolean) => void;
+}) {
   const router = useRouter();
   const [html, setHtml] = useState("");
   const [imgQuery, setImgQuery] = useState<string | null>("");
@@ -17,6 +20,7 @@ export default function WritePage() {
     name: "",
   });
   const param = useParams().slug;
+  const queryClient = useQueryClient();
 
   const handleHtmlChange = (html: string) => {
     setHtml(html);
@@ -31,21 +35,54 @@ export default function WritePage() {
     console.log(postInfo);
   };
 
+  const deletePostMutation = useMutation(
+    ({
+      title,
+      name,
+      content,
+      param,
+      imgQuery,
+    }: {
+      title: string;
+      name: string;
+      content: string;
+      param: string;
+      imgQuery: string;
+    }) => createPost(title, name, content, param, imgQuery),
+    {
+      onSuccess: () => queryClient.invalidateQueries(["spacePostList"]),
+    }
+  );
+
   const handleSubmitPost = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(postInfo);
     console.log(html);
     try {
       if (html) {
-        await createPost(
-          postInfo.title,
-          postInfo.name,
-          html,
-          param.toString(),
-          imgQuery ? imgQuery : "wave"
-        ).then(() => {
-          router.push(`/mypage/myspace/${param}`);
-        });
+        deletePostMutation.mutate(
+          {
+            title: postInfo.title,
+            name: postInfo.name,
+            content: html,
+            param: param.toString(),
+            imgQuery: imgQuery ? imgQuery : "wave",
+          },
+          {
+            onSuccess() {
+              setIsCreate(false);
+            },
+          }
+        );
+        // await createPost(
+        //   postInfo.title,
+        //   postInfo.name,
+        //   html,
+        //   param.toString(),
+        //   imgQuery ? imgQuery : "wave"
+        // ).then(() => {
+        //   router.push(`/mypage/myspace/${param}`);
+        // });
       } else {
         alert("내용을 입력해주세요");
       }
@@ -56,9 +93,9 @@ export default function WritePage() {
   console.log(param);
 
   return (
-    <div>
-      <form onSubmit={handleSubmitPost}>
-        <label htmlFor="">
+    <div className="h-full">
+      <form onSubmit={handleSubmitPost} className=" flex flex-col gap-2 h-full">
+        <label htmlFor="" className="h-[10%]">
           <p>제목</p>
           <input
             type="text"
@@ -68,7 +105,7 @@ export default function WritePage() {
             required
           />
         </label>
-        <label htmlFor="">
+        <label htmlFor="" className="h-[10%]">
           <p>이름</p>
           <input
             type="text"
@@ -78,7 +115,7 @@ export default function WritePage() {
             required
           />
         </label>
-        <label htmlFor="">
+        <label htmlFor="" className="h-[10%]">
           <div className="flex gap-2 items-end">
             <p>랜덤 이미지 단어</p>
             <small>

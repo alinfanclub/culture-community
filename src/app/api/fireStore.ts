@@ -224,3 +224,7 @@ export async function getSpacePostList(
   });
   return postlist;
 }
+
+export async function deletePost(postId: string) {
+  await deleteDoc(doc(db, "posts", postId));
+}

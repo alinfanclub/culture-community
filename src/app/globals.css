@@ -18,3 +18,34 @@ body *::-webkit-scrollbar-track {
   background-color: transparent;
   border-radius: 10px;
 }
+.custom-quill .ql-toolbar {
+  display: none;
+  max-height: 0;
+}
+.custom-quill .ql-toolbar.ql-snow + .ql-container.ql-snow {
+  border: none;
+  height: 100%;
+}
+ql-snow *,
+.ql-blank > p {
+  color: #fff !important;
+}
+.quill {
+  height: 70%;
+  display: flex;
+  flex-direction: column;
+}
+.custom-quill.quill {
+  height: 90%;
+}
+.ql-editor {
+  height: 100%;
+  overflow-y: scroll;
+}
+.ql-toolbar {
+  height: 10%;
+}
+.ql-container {
+  height: 90%;
+  max-height: 90%;
+}

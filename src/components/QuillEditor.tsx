@@ -50,7 +50,7 @@ export default function QuillEditor({
       modules={modules}
       formats={formats}
       value={html}
-      placeholder={"후원받고자 하는 동물의 자세한 정보를 입력해주세요!"}
+      placeholder={"내용을 입력해주세요"}
       theme="snow"
     />
   );

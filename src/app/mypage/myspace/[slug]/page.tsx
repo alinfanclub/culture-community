@@ -32,6 +32,7 @@ export default function MypageSpaceDetail() {
   const router = useRouter();
   const [isView, setIsView] = useState(false);
   const [isCreate, setIsCreate] = useState(false);
+  const [isSpaceBodyOut, setIsSpaceBodyOut] = useState(false);
 
   const uploadBgImage = useMutation(
     ({ file, param }: { file: any; param: string }) =>
@@ -135,6 +136,27 @@ export default function MypageSpaceDetail() {
     setIsView(false);
   };
 
+  useEffect(() => {
+    const spaceBodyElement = document.getElementById("spaceBody");
+
+    if (spaceBodyElement) {
+      const handleScroll = () => {
+        const spaceBodyRect = spaceBodyElement.getBoundingClientRect();
+        if (spaceBodyRect.top < 0) {
+          setIsSpaceBodyOut(true);
+        } else {
+          setIsSpaceBodyOut(false);
+        }
+      };
+
+      window.addEventListener("scroll", handleScroll);
+
+      return () => {
+        window.removeEventListener("scroll", handleScroll);
+      };
+    }
+  }, []);
+
   if (isLoading || spacePostListLoading) return <div>loading</div>;
   if (isError || spacePostListError) return <div>error</div>;
 
@@ -166,7 +188,10 @@ export default function MypageSpaceDetail() {
           </label>
           {customLoading && <ClipSpinner color="#fff" />}
         </article> */}
-        <article id="spaceBody" className="h-[10%]">
+        <article
+          id="spaceBody"
+          className={`h-[10%] ${isSpaceBodyOut ? "fixed w-full top-0" : ""}`}
+        >
           <div className="flex items-center justify-between py-4 border-b-2 border-white">
             <div className="flex gap-4 items-end">
               <h1 className="text-3xl">{spaceArea.title}</h1>
@@ -190,7 +215,7 @@ export default function MypageSpaceDetail() {
         <article className="flex box-border py-2 grow h-full">
           <div
             id=""
-            className="flex flex-col gap-2 overflow-y-scroll w-60 bg-[rgba(0,0,0,0.7)] h-[50vw] sticky top-0"
+            className="flex flex-col gap-2 overflow-y-scroll w-60 bg-[rgba(0,0,0,0.7)] h-[100vh] "
           >
             {spacePostList.map((data, index) => (
               <PostBlock

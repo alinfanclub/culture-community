@@ -21,7 +21,6 @@ import { DocumentData } from "firebase/firestore";
 import PostBlock from "@/components/PostBlock";
 import QuillViewer from "@/components/QuillViewer";
 import WritePage from "@/components/WritePage";
-import { set } from "firebase/database";
 
 export default function MypageSpaceDetail() {
   const queryClient = useQueryClient();
@@ -162,61 +161,59 @@ export default function MypageSpaceDetail() {
 
   return (
     spaceArea && (
-      <section className={`text-white w-[90%] mx-auto flex flex-col h-auto`}>
-        {/* <article
-          className={`w-full h-[10%] overflow-hidden relative flex justify-center items-center mx-auto bg-white`}
-        >
-          <Image
-            key={spaceArea.backgroundImage}
-            src={spaceArea.backgroundImage}
-            alt="spaceImage"
-            width={1000}
-            height={1000}
-            priority={true}
-            loading="eager"
-            className="w-full h-full object-cover object-center bg-white opacity-80"
-          />
-          <input
-            type="file"
-            title="file"
-            id="file"
-            className="absolute bottom-4 right-4 z-[10] hidden"
-            onChange={handleFileChange}
-          />
-          <label htmlFor="file" className="absolute bottom-4 right-4 z-[10]">
-            사진변경
-          </label>
-          {customLoading && <ClipSpinner color="#fff" />}
-        </article> */}
-        <article
-          id="spaceBody"
-          className={`h-[10%] ${isSpaceBodyOut ? "fixed w-full top-0" : ""}`}
-        >
-          <div className="flex items-center justify-between py-4 border-b-2 border-white">
-            <div className="flex gap-4 items-end">
-              <h1 className="text-3xl">{spaceArea.title}</h1>
-              <div className="flex gap-4 items-end">
-                <p>{timeStampFormat(spaceArea.createdAt)}</p>
-                <small>{formatAgo(timeStampFormat(spaceArea.createdAt))}</small>
-              </div>
-            </div>
-            {/* <Link
-              href={{
-                pathname: "/mypage/[slug]",
-                query: { slug: param },
-              }}
-              as={`/mypage/${param}`}
-            >
-              글작성
-            </Link> */}
-            <button onClick={() => handleWirteState()}>글작성</button>
-          </div>
-        </article>
-        <article className="flex box-border py-2 grow h-full">
-          <div
-            id=""
-            className="flex flex-col gap-2 overflow-y-scroll w-60 bg-[rgba(0,0,0,0.7)] h-[100vh] "
+      <>
+        <section className={`text-white w-[90%] mx-auto flex flex-col h-full`}>
+          <article
+            className={`w-full h-[10%] overflow-hidden relative flex justify-center items-center mx-auto bg-white`}
           >
+            <Image
+              key={spaceArea.backgroundImage}
+              src={spaceArea.backgroundImage}
+              alt="spaceImage"
+              width={1000}
+              height={1000}
+              priority={true}
+              loading="eager"
+              className="w-full h-full object-cover object-center bg-white opacity-80"
+            />
+            <input
+              type="file"
+              title="file"
+              id="file"
+              className="absolute bottom-4 right-4 z-[10] hidden"
+              onChange={handleFileChange}
+            />
+            <label htmlFor="file" className="absolute bottom-4 right-4">
+              사진변경
+            </label>
+            {customLoading && <ClipSpinner color="#fff" />}
+          </article>
+          <article
+            id="spaceBody"
+            className={`h-[10%] ${isSpaceBodyOut ? "fixed w-full top-0" : ""}`}
+          >
+            <div className="flex items-center justify-between py-4 border-b-2 border-white">
+              <div className="flex gap-4 items-end">
+                <h1 className="text-3xl">{spaceArea.title}</h1>
+                <div className="flex gap-4 items-end">
+                  <p>{timeStampFormat(spaceArea.createdAt)}</p>
+                  <small>
+                    {formatAgo(timeStampFormat(spaceArea.createdAt))}
+                  </small>
+                </div>
+              </div>
+              <Link
+                href={{
+                  pathname: "/mypage/[slug]",
+                  query: { slug: param },
+                }}
+                as={`/mypage/${param}`}
+              >
+                글작성
+              </Link>
+            </div>
+          </article>
+          <article className="flex box-border py-2 grow h-full">
             {spacePostList.map((data, index) => (
               <PostBlock
                 data={data}
@@ -225,23 +222,29 @@ export default function MypageSpaceDetail() {
                 handleGetInex={handleGetInex}
               />
             ))}
+          </article>
+        </section>
+
+        <div
+          className={`${
+            isView ? "opacity-100 z-0" : "opacity-0 -z-10"
+          } bg-[rgba(0,0,0,0.5)] w-screen h-screen fixed top-0 left-0 transition-all`}
+          onClick={() => setIsView(false)}
+        ></div>
+        {
+          <div
+            className={`w-full 2xl:w-[50%] fixed ${
+              isView ? "top-0 right-0" : "top-0 -right-[100%]"
+            } transition-all bg-zinc-200 h-screen`}
+          >
+            <div className="">
+              <h1>{eachPost?.title}</h1>
+              <div onClick={() => hadleDeletPost(eachPost?.postId)}>삭제</div>
+            </div>
+            <QuillViewer html={eachPost?.content} />
           </div>
-          <div className="">
-            {eachPost && isView && (
-              <div className="">
-                <div className="">
-                  <h1>{eachPost.title}</h1>
-                  <div onClick={() => hadleDeletPost(eachPost.postId)}>
-                    삭제
-                  </div>
-                </div>
-                <QuillViewer html={eachPost.content} />
-              </div>
-            )}
-            {isCreate && <WritePage setIsCreate={setIsCreate} />}
-          </div>
-        </article>
-      </section>
+        }
+      </>
     )
   );
 }

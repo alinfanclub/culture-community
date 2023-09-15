@@ -18,14 +18,42 @@ body *::-webkit-scrollbar-track {
   background-color: transparent;
   border-radius: 10px;
 }
+.ql-toolbar.ql-snow {
+  border: none !important;
+}
+.ql-toolbar.ql-snow {
+  @apply sticky top-0 z-10 bg-zinc-900 border-none;
+}
+.ql-container.ql-snow {
+  border: none !important;
+}
+.ql-container.ql-snow {
+  border: none !important;
+  color: #fff !important;
+}
+.ql-snow .ql-picker {
+  color: #fff !important;
+}
+.ql-snow .ql-fill,
+.ql-snow .ql-stroke.ql-fill {
+  fill: #fff !important;
+}
+.ql-snow .ql-stroke {
+  stroke: #fff !important;
+}
+.ql-editor.ql-blank::before {
+  color: #fff !important;
+}
 .custom-quill .ql-toolbar {
   display: none;
   max-height: 0;
 }
-.custom-quill .ql-toolbar.ql-snow + .ql-container.ql-snow {
+/* .custom-quill .ql-toolbar.ql-snow + .ql-container.ql-snow {
   border: none;
   height: 100%;
-}
+} */
+/* 
+
 ql-snow *,
 .ql-blank > p {
   color: #fff !important;
@@ -48,4 +76,4 @@ ql-snow *,
 .ql-container {
   height: 90%;
   max-height: 90%;
-}
+} */

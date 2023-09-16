@@ -224,7 +224,7 @@ export default function MypageSpaceDetail() {
       <>
         <section className={`text-white w-[90%] mx-auto flex flex-col h-fit`}>
           <article
-            className={`w-full h-20 xl:h-[10%] overflow-hidden relative flex justify-center items-center mx-auto bg-white`}
+            className={`w-full h-20 xl:h-20 overflow-hidden relative flex justify-center items-center mx-auto bg-white`}
           >
             <Image
               key={spaceArea.backgroundImage}
@@ -248,12 +248,7 @@ export default function MypageSpaceDetail() {
             </label>
             {customLoading && <ClipSpinner color="#fff" />}
           </article>
-          <article
-            id="spaceBody"
-            className={`  h-fit xl:h-[10%] ${
-              isSpaceBodyOut ? "fixed w-full top-0" : ""
-            }`}
-          >
+          <article id="spaceBody" className={`h-fit xl:h-[10%]`}>
             <div className="flex xl:items-center justify-between py-4 border-b-2 border-white items-start">
               <div className="flex gap-4 xl:items-end flex-col xl:flex-row">
                 <h1 className="text-3xl">{spaceArea.title}</h1>

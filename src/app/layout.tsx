@@ -36,7 +36,7 @@ export default function RootLayout({
               <HeaderUserStateComponent />
             </nav>
           </header>
-          <div className="h-calc-body text-white bg-zinc-900">
+          <div className="xl:h-calc-body h-auto min-h-full text-white bg-zinc-900">
             <ReactQueryProvider>{children}</ReactQueryProvider>
           </div>
         </FirebaseAuthProvider>

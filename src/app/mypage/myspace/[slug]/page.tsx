@@ -222,9 +222,9 @@ export default function MypageSpaceDetail() {
   return (
     spaceArea && (
       <>
-        <section className={`text-white w-[90%] mx-auto flex flex-col h-full`}>
+        <section className={`text-white w-[90%] mx-auto flex flex-col h-fit`}>
           <article
-            className={`w-full h-[10%] overflow-hidden relative flex justify-center items-center mx-auto bg-white`}
+            className={`w-full h-20 xl:h-[10%] overflow-hidden relative flex justify-center items-center mx-auto bg-white`}
           >
             <Image
               key={spaceArea.backgroundImage}
@@ -250,10 +250,12 @@ export default function MypageSpaceDetail() {
           </article>
           <article
             id="spaceBody"
-            className={`h-[10%] ${isSpaceBodyOut ? "fixed w-full top-0" : ""}`}
+            className={`  h-fit xl:h-[10%] ${
+              isSpaceBodyOut ? "fixed w-full top-0" : ""
+            }`}
           >
-            <div className="flex items-center justify-between py-4 border-b-2 border-white">
-              <div className="flex gap-4 items-end">
+            <div className="flex xl:items-center justify-between py-4 border-b-2 border-white items-start">
+              <div className="flex gap-4 xl:items-end flex-col xl:flex-row">
                 <h1 className="text-3xl">{spaceArea.title}</h1>
                 <div className="flex gap-4 items-end">
                   <p>{timeStampFormat(spaceArea.createdAt)}</p>
@@ -273,7 +275,7 @@ export default function MypageSpaceDetail() {
               </Link>
             </div>
           </article>
-          <article className="flex box-border py-2 grow h-full">
+          <article className="grid grid-cols-2 h-auto gap-4 xl:flex py-2 xl:grow xl:h-full">
             {spacePostList.map((data, index) => (
               <PostBlock
                 data={data}

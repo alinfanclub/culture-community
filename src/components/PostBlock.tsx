@@ -14,7 +14,7 @@ export default function PostBlock({
   order: number;
 }) {
   return (
-    <div className="w-60 rounded-2xl text-white h-fit">
+    <div className="w-auto xl:w-60 rounded-2xl text-white h-fit">
       {/* <Link href={`/mypage/mypost/${data.postId}`}>
         <div className="rounded-lg max-w-full image-thumbnail-crop-frame overflow-hidden flex items-center justify-center aspect-[4/2]">
           <Image

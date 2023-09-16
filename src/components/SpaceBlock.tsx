@@ -1,6 +1,7 @@
 "use client";
 
 import { deleteSpace } from "@/app/api/fireStore";
+import { useAuthContext } from "@/app/context/FirebaseAuthContext";
 import { spaceAreaType } from "@/app/types/mySpaceType";
 import { timeStampFormat } from "@/app/util/timeStampFormat";
 import { formatAgo } from "@/app/util/timeago";
@@ -13,10 +14,13 @@ type index = {
 export default function SpaceBlock({ data, order }: DocumentData & index) {
   const time = timeStampFormat(data.createdAt);
   const handleSpaceDelete = () => {
-    if (confirm("스페이스를 삭제하시겠습니까?")) {
+    if (
+      confirm("스페이스를 삭제하시겠습니까? 하위 게시글도 모두 삭제됩니다.")
+    ) {
       deleteSpace(data.spaceId);
     }
   };
+  const { user } = useAuthContext();
   return (
     <article className="w-content text-white">
       <Link href={`/mypage/myspace/${data.spaceId}`}>
@@ -30,7 +34,7 @@ export default function SpaceBlock({ data, order }: DocumentData & index) {
           />
           <div className="z-10 w-[80%] h-[80%] bg-white absolute top-1/2 left-1/2  -translate-x-1/2 -translate-y-1/2 p-4">
             <small className="text-right w-full block">
-              {" "}
+              {user?.displayName} 시인선{" "}
               {order < 10 ? "0" + (order + 1) : order + 1}
             </small>
             <h3>{data.title}</h3>

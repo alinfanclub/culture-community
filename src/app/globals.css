@@ -43,10 +43,21 @@ body *::-webkit-scrollbar-track {
 }
 .ql-editor.ql-blank::before {
   color: #fff !important;
+  left: 0 !important;
 }
 .custom-quill .ql-toolbar {
   display: none;
   max-height: 0;
+}
+.ql-editor {
+  /* text-indent: 1rem; */
+  padding: 0 !important;
+  padding-top: 1rem !important;
+}
+.ql-editor {
+  tab-size: 20 !important;
+  -moz-tab-size: 20 !important;
+  -o-tab-size: 20 !important;
 }
 /* .custom-quill .ql-toolbar.ql-snow + .ql-container.ql-snow {
   border: none;

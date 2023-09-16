@@ -5,9 +5,10 @@ export default function QuillViewer({ html }: { html: string }) {
   return (
     <ReactQuill
       value={html}
-      readOnly={true}
       theme="snow"
       className="custom-quill"
+      tabIndex={100}
+      readOnly={false}
     />
   );
 }

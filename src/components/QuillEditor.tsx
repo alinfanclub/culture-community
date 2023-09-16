@@ -1,3 +1,5 @@
+import QuillNoSSRWrapper from "@/app/util/QuillSSR";
+import dynamic from "next/dynamic";
 import { useMemo, useRef } from "react";
 import ReactQuill from "react-quill";
 
@@ -6,9 +8,9 @@ export default function QuillEditor({
   handleHtmlChange,
 }: {
   html: string;
-  handleHtmlChange: (html: string) => void;
+  handleHtmlChange?: (html: any) => void;
 }) {
-  const quillRef = useRef(null);
+  const quillInstance = useRef<ReactQuill>(null);
 
   const modules = useMemo(
     () => ({
@@ -44,8 +46,8 @@ export default function QuillEditor({
     "image",
   ];
   return (
-    <ReactQuill
-      ref={quillRef}
+    <QuillNoSSRWrapper
+      forwardedRef={quillInstance}
       onChange={handleHtmlChange}
       modules={modules}
       formats={formats}

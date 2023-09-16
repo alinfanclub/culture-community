@@ -26,6 +26,8 @@ import {
   uploadBytes,
   uploadString,
 } from "firebase/storage";
+import { log } from "console";
+import ReactQuill from "react-quill";
 
 export async function setUserData(user: User): Promise<void> {
   await setDoc(doc(db, "account", user.uid), {
@@ -139,6 +141,16 @@ const getImageByQuery = async (query: string): Promise<string> => {
 
 // ~ 스페이스 삭제
 export async function deleteSpace(spaceId: string) {
+  const q = query(collection(db, "posts"), where("hostSpaceId", "==", spaceId));
+  await getDocs(q).then((querySnapshot) => {
+    querySnapshot.forEach((data) => {
+      try {
+        deleteDoc(doc(db, "posts", data.data().postId));
+      } catch (error) {
+        console.log(error);
+      }
+    });
+  });
   await deleteDoc(doc(db, "spaces", spaceId));
 }
 
@@ -227,4 +239,17 @@ export async function getSpacePostList(
 
 export async function deletePost(postId: string) {
   await deleteDoc(doc(db, "posts", postId));
+}
+
+export async function updatePost(
+  postId: string,
+  postInfo: { title: string; name: string },
+  html: string
+) {
+  const postRef = doc(db, "posts", postId);
+  await updateDoc(postRef, {
+    title: postInfo.title,
+    author: postInfo.name,
+    content: html,
+  });
 }

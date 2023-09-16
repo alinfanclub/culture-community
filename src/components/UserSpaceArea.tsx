@@ -66,14 +66,14 @@ export default function UserSpaceArea() {
   if (isError) return <div>error</div>;
 
   return (
-    <div className="text-white p-4">
-      <div className="flex justify-between items-center">
+    <div className="text-white p-4  bg-zinc-900">
+      <div className="flex justify-between items-center flex-wrap">
         <UserWelcomMsg />
         <button type="button" onClick={() => handleMakeSpace()}>
           스페이스추가
         </button>
       </div>
-      <div className="flex gap-4 py-2">
+      <div className="xl:flex gap-4 py-2 flex-wrap justify-center grid grid-cols-2">
         {spaceArea
           .sort((a, b) => b.createdAt - a.createdAt)
           .map((data, index) => (
@@ -82,7 +82,7 @@ export default function UserSpaceArea() {
         <button
           type="button"
           onClick={() => handleMakeSpace()}
-          className="w-60 rounded-2xl aspect-[4/2] border border-dashed"
+          className="w-40 rounded-2xl aspect-[1/1.5] border border-dashed"
         >
           스페이스 추가 +
         </button>

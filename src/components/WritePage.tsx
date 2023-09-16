@@ -1,11 +1,11 @@
 "use client";
 
 import { createPost } from "@/app/api/fireStore";
-import QuillEditor from "@/components/QuillEditor";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
-import QuillViewer from "./QuillViewer";
+import QuillEditor from "@/components/QuillEditor";
+import ReactQuill from "react-quill";
 import("@/components/QuillEditor");
 
 export default function WritePage() {
@@ -87,11 +87,10 @@ export default function WritePage() {
       console.log(error);
     }
   };
-  console.log(param);
 
   return (
     <section className="flex h-full">
-      <div className="h-full w-full p-2 2xl:p-6 bg-zinc-800 2xl:w-1/2">
+      <div className="h-full w-full p-2 xl:p-6 bg-zinc-800 xl:w-1/2">
         <form
           onSubmit={handleSubmitPost}
           className=" flex flex-col gap-2 h-full"
@@ -125,10 +124,17 @@ export default function WritePage() {
           </div>
         </form>
       </div>
-      <div className="hidden w-1/2 2xl:block overflow-y-scroll mb-24 p-2 2xl:p-6">
-        <p className="h-16  line  leading-[4rem]">{postInfo.title}</p>
-        <p className="h-16 line  leading-[4rem]">{postInfo.name}</p>
-        <QuillViewer html={html} />
+      <div className="hidden w-1/2 xl:block overflow-y-scroll mb-24 p-2 xl:p-6">
+        <div className="flex items-baseline gap-8 pb-10">
+          <p className="h-16  line  leading-[4rem] text-2xl">
+            {postInfo.title}
+          </p>
+          <p className="h-8 line  leading-[2rem]">{postInfo.name}</p>
+        </div>
+        <div
+          className="ql-editor viewer"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
       </div>
     </section>
   );

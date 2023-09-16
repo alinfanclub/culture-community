@@ -3,7 +3,6 @@ import { timeStampFormat } from "@/app/util/timeStampFormat";
 import { formatAgo } from "@/app/util/timeago";
 import { DocumentData } from "firebase/firestore";
 import Image from "next/image";
-import Link from "next/link";
 
 export default function PostBlock({
   data,

@@ -294,10 +294,10 @@ export default function MypageSpaceDetail() {
           <div
             className={`w-full xl:w-[50%] fixed ${
               isView ? "top-0 right-0" : "top-0 -right-[100%]"
-            } transition-all bg-zinc-900 h-screen p-4 px-6 text-white z-[30]`}
+            } transition-all bg-zinc-900 h-full  text-white z-[30] flex flex-col`}
           >
             {isEditing ? (
-              <div className="h-full w-full">
+              <div className="h-[95%] w-full">
                 <form
                   onSubmit={handleSubmitPost}
                   className=" flex flex-col gap-2 h-full"
@@ -337,7 +337,7 @@ export default function MypageSpaceDetail() {
                 </form>
               </div>
             ) : (
-              <>
+              <div className="h-[95%] flex flex-col">
                 <div className="flex items-baseline gap-8 pb-10">
                   <p className="h-16  line  leading-[4rem] text-2xl">
                     {eachPost?.title}
@@ -345,25 +345,26 @@ export default function MypageSpaceDetail() {
                   <p className="h-8 line  leading-[2rem]">{eachPost?.author}</p>
                 </div>
 
-                <div className="h-full overflow-y-scroll">
+                <div className="grow overflow-y-scroll">
                   <div
                     className=" overflow-wrap break-words"
                     dangerouslySetInnerHTML={{ __html: eachPost?.content }}
                   />
                 </div>
-              </>
+              </div>
             )}
-            <div className="absolute right-4 top-4 flex items-center gap-8">
-              <button onClick={() => hadleDeletPost(eachPost?.postId)}>
-                삭제
-              </button>
+            <div className="min-h-[5%] flex items-center gap-8 justify-end bg-zinc-800 px-4">
               <button onClick={() => setIsEditing(!isEditing)}>
                 {isEditing ? "수정 취소" : "수정 하기"}
+              </button>
+              <button onClick={() => hadleDeletPost(eachPost?.postId)}>
+                삭제
               </button>
               <button
                 onClick={() => {
                   setIsView(false), setIsEditing(false);
                 }}
+                className="absolute top-4 right-4"
               >
                 x
               </button>

@@ -3,6 +3,7 @@
 import {
   deleteOldImage,
   deletePost,
+  getPostDetailData,
   getSpaceDataDetail,
   getSpacePostList,
   updatePost,
@@ -31,19 +32,11 @@ export default function MypageSpaceDetail() {
   const queryClient = useQueryClient();
   const param = useParams().slug;
   const [customLoading, setCustomLoading] = useState(false);
-  const [eachPost, setEachPost] = useState<DocumentData | null>();
   const { user } = useAuthContext();
   const router = useRouter();
   const [isView, setIsView] = useState(false);
-  const [isCreate, setIsCreate] = useState(false);
-  const [isSpaceBodyOut, setIsSpaceBodyOut] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [html, setHtml] = useState(eachPost?.content);
-  const [indexState, setIndexState] = useState<number>(0);
-  const [postInfo, setPostInfo] = useState({
-    title: eachPost?.title,
-    name: eachPost?.author,
-  });
+  const [selectedPostId, setSelectedPostId] = useState<string>("");
 
   const uploadBgImage = useMutation(
     ({ file, param }: { file: any; param: string }) =>
@@ -70,7 +63,9 @@ export default function MypageSpaceDetail() {
       postInfo: { title: string; name: string };
       content: string;
     }) => updatePost(postId, postInfo, content),
-    { onSuccess: () => queryClient.invalidateQueries(["spacePostList"]) }
+    {
+      onSuccess: () => queryClient.invalidateQueries(["spacePostList"]),
+    }
   );
 
   const handleFileChange = (
@@ -79,22 +74,22 @@ export default function MypageSpaceDetail() {
     e.preventDefault();
     const selectedFile = e.target.files;
     //
-    if (selectedFile) {
-      setCustomLoading(true);
-      spaceArea && deleteOldImage(spaceArea.backgroundImage);
-      uploadBgImage.mutate(
-        { file: selectedFile, param: param.toString() },
-        {
-          onSuccess() {
-            queryClient.invalidateQueries(["spaceAreaDetail"]);
-            setCustomLoading(false);
-          },
-          onError() {
-            setCustomLoading(false);
-          },
-        }
-      );
-    }
+
+    setCustomLoading(true);
+    spaceArea && deleteOldImage(spaceArea.backgroundImage);
+    uploadBgImage.mutate(
+      { file: selectedFile, param: param.toString() },
+      {
+        onSuccess() {
+          setCustomLoading(false);
+          alert("사진이 변경되었습니다.");
+        },
+        onError() {
+          setCustomLoading(false);
+          alert("사진 변경에 실패하였습니다.");
+        },
+      }
+    );
   };
 
   const {
@@ -115,6 +110,18 @@ export default function MypageSpaceDetail() {
     queryFn: () => getSpacePostList(param.toString()),
   });
 
+  const { data: postDetail } = useQuery({
+    queryKey: ["spacePostList", selectedPostId],
+    queryFn: () => getPostDetailData(selectedPostId),
+    enabled: !!setSelectedPostId,
+  });
+
+  const [postInfo, setPostInfo] = useState({
+    title: postDetail?.title,
+    name: postDetail?.author,
+  });
+  const [html, setHtml] = useState(postDetail?.content);
+
   useEffect(() => {
     const authToken = Cookies.get("authToken");
     if (authToken === undefined) {
@@ -124,13 +131,6 @@ export default function MypageSpaceDetail() {
     }
   }, [router, user]);
 
-  const handleGetInex = (index: number) => {
-    setIndexState(index);
-    setEachPost(spacePostList[index]);
-    setIsView(true);
-    setIsCreate(false);
-  };
-
   const hadleDeletPost = (postId: string) => {
     try {
       window.confirm("삭제하시겠습니까?")
@@ -138,7 +138,6 @@ export default function MypageSpaceDetail() {
             { postId },
             {
               onSuccess: () => {
-                setEachPost(null);
                 setIsView(false);
               },
             }
@@ -154,48 +153,21 @@ export default function MypageSpaceDetail() {
     try {
       EditPostMutation.mutate(
         {
-          postId: eachPost?.postId,
+          postId: postDetail?.postId,
           postInfo,
           content: html,
         },
         {
           onSuccess: () => {
             setIsEditing(false);
-            setIsView(false);
+            queryClient.invalidateQueries(["postDetail", "spacePostList"]);
           },
         }
       );
-      // await updatePost(eachPost?.postId, postInfo, html);
     } catch (error) {
       console.log(error);
     }
   };
-
-  const handleWirteState = () => {
-    setIsCreate(!isCreate);
-    setIsView(false);
-  };
-
-  useEffect(() => {
-    const spaceBodyElement = document.getElementById("spaceBody");
-
-    if (spaceBodyElement) {
-      const handleScroll = () => {
-        const spaceBodyRect = spaceBodyElement.getBoundingClientRect();
-        if (spaceBodyRect.top < 0) {
-          setIsSpaceBodyOut(true);
-        } else {
-          setIsSpaceBodyOut(false);
-        }
-      };
-
-      window.addEventListener("scroll", handleScroll);
-
-      return () => {
-        window.removeEventListener("scroll", handleScroll);
-      };
-    }
-  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<EventTarget & HTMLInputElement>
@@ -210,11 +182,11 @@ export default function MypageSpaceDetail() {
   };
 
   useEffect(() => {
-    if (eachPost) {
-      setPostInfo({ title: eachPost.title, name: eachPost.author });
-      setHtml(eachPost.content);
+    if (postDetail) {
+      setPostInfo({ title: postDetail.title, name: postDetail.author });
+      setHtml(postDetail.content);
     }
-  }, [isEditing, eachPost]);
+  }, [isEditing, postDetail]);
 
   if (isLoading || spacePostListLoading) return <div>loading</div>;
   if (isError || spacePostListError) return <div>error</div>;
@@ -272,12 +244,14 @@ export default function MypageSpaceDetail() {
           </article>
           <article className="grid grid-cols-2 h-auto gap-4 xl:flex py-2 xl:grow xl:h-full">
             {spacePostList.map((data, index) => (
-              <PostBlock
-                data={data}
+              <div
                 key={index}
-                order={index}
-                handleGetInex={handleGetInex}
-              />
+                onClick={() => {
+                  setSelectedPostId(data.postId), setIsView(true);
+                }}
+              >
+                <PostBlock data={data} key={index} />
+              </div>
             ))}
           </article>
         </section>
@@ -297,12 +271,12 @@ export default function MypageSpaceDetail() {
             } transition-all bg-zinc-900 h-full  text-white z-[30] flex flex-col`}
           >
             {isEditing ? (
-              <div className="h-[95%] w-full">
+              <div className="h-full w-full">
                 <form
                   onSubmit={handleSubmitPost}
                   className=" flex flex-col gap-2 h-full"
                 >
-                  <label htmlFor="" className="">
+                  <label htmlFor="" className="px-4">
                     <input
                       type="text"
                       name="title"
@@ -313,7 +287,7 @@ export default function MypageSpaceDetail() {
                       value={postInfo.title}
                     />
                   </label>
-                  <label htmlFor="" className="">
+                  <label htmlFor="" className="px-4">
                     <input
                       type="text"
                       name="name"
@@ -324,51 +298,55 @@ export default function MypageSpaceDetail() {
                       value={postInfo.name}
                     />
                   </label>
-                  <div className="h-full overflow-y-scroll mb-24">
+                  <div className="h-full overflow-y-scroll px-4">
                     <QuillEditor
                       html={html}
                       handleHtmlChange={handleHtmlChange}
                     />
                   </div>
-                  <div className="w-full h-20 bg-zinc-700 flex gap-4 fixed left-0 bottom-0 p-2 2xl:p-6 box-border">
+                  <div className="min-h-[5%] flex items-center gap-8 justify-end bg-zinc-800 px-4">
+                    <button onClick={() => setIsEditing(!isEditing)}>
+                      {isEditing ? "수정 취소" : "수정 하기"}
+                    </button>
                     <button type="submit">제출</button>
-                    <button type="button">임시저장</button>
                   </div>
                 </form>
               </div>
             ) : (
-              <div className="h-[95%] flex flex-col">
-                <div className="flex items-baseline gap-8 pb-10">
+              <div className="h-full flex flex-col">
+                <div className="flex items-baseline gap-8 pb-10 px-4">
                   <p className="h-16  line  leading-[4rem] text-2xl">
-                    {eachPost?.title}
+                    {postDetail?.title}
                   </p>
-                  <p className="h-8 line  leading-[2rem]">{eachPost?.author}</p>
+                  <p className="h-8 line  leading-[2rem]">
+                    {postDetail?.author}
+                  </p>
                 </div>
 
-                <div className="grow overflow-y-scroll">
+                <div className="grow overflow-y-scroll px-4">
                   <div
                     className=" overflow-wrap break-words"
-                    dangerouslySetInnerHTML={{ __html: eachPost?.content }}
+                    dangerouslySetInnerHTML={{ __html: postDetail?.content }}
                   />
+                </div>
+                <div className="min-h-[5%] flex items-center gap-8 justify-end bg-zinc-800 px-4">
+                  <button onClick={() => setIsEditing(!isEditing)}>
+                    {isEditing ? "수정 취소" : "수정 하기"}
+                  </button>
+                  <button onClick={() => hadleDeletPost(postDetail?.postId)}>
+                    삭제
+                  </button>
                 </div>
               </div>
             )}
-            <div className="min-h-[5%] flex items-center gap-8 justify-end bg-zinc-800 px-4">
-              <button onClick={() => setIsEditing(!isEditing)}>
-                {isEditing ? "수정 취소" : "수정 하기"}
-              </button>
-              <button onClick={() => hadleDeletPost(eachPost?.postId)}>
-                삭제
-              </button>
-              <button
-                onClick={() => {
-                  setIsView(false), setIsEditing(false);
-                }}
-                className="absolute top-4 right-4"
-              >
-                x
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                setIsView(false), setIsEditing(false);
+              }}
+              className="absolute top-4 right-4"
+            >
+              x
+            </button>
           </div>
         }
       </>

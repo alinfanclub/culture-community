@@ -213,6 +213,8 @@ export async function createPost(
         backgroundImage: (
           await getImageByQuery(imgQuery ? imgQuery : "wave")
         ).toString(),
+        isOpenCritic: false,
+        istemporary: false,
       }));
   } catch (error) {
     console.log(error);
@@ -221,6 +223,44 @@ export async function createPost(
   return postId;
 }
 
+export async function createTemporaryPost(
+  title: string,
+  name: string,
+  content: string,
+  spaceId: string,
+  imgQuery?: string
+): Promise<string> {
+  const postId = uuidv1();
+  const user = getAuth().currentUser;
+  try {
+    user &&
+      (await setDoc(doc(db, "posts", postId), {
+        createdAt: serverTimestamp(),
+        title: title,
+        author: name,
+        content: content,
+        userInfos: {
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+        },
+        postId: postId,
+        hostSpaceId: spaceId,
+        Useruid: user.uid,
+        fix: false,
+        backgroundImage: (
+          await getImageByQuery(imgQuery ? imgQuery : "wave")
+        ).toString(),
+        isOpenCritic: false,
+        istemporary: true,
+      }));
+  } catch (error) {
+    console.log(error);
+  }
+
+  return postId;
+}
+
+// ~ 글 리스트 가져오기
 export async function getSpacePostList(
   postId: string
 ): Promise<DocumentData[]> {
@@ -237,10 +277,23 @@ export async function getSpacePostList(
   return postlist;
 }
 
+// ~ 글 디테일 가져오기
+export async function getPostDetailData(postId: string): Promise<DocumentData> {
+  const q = query(collection(db, "posts"), where("postId", "==", postId));
+  const querySnapshot = await getDocs(q);
+  let data: DocumentData = {};
+  querySnapshot.forEach((doc) => {
+    data = Object(doc.data());
+  });
+  return data;
+}
+
+// ~ 글 삭제
 export async function deletePost(postId: string) {
   await deleteDoc(doc(db, "posts", postId));
 }
 
+// ~ 글 수정하기
 export async function updatePost(
   postId: string,
   postInfo: { title: string; name: string },
@@ -251,5 +304,12 @@ export async function updatePost(
     title: postInfo.title,
     author: postInfo.name,
     content: html,
+  });
+}
+
+export async function updateCriticState(postId: string, state: boolean) {
+  const postRef = doc(db, "posts", postId);
+  await updateDoc(postRef, {
+    isOpenCritic: !state,
   });
 }

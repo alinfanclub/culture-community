@@ -357,7 +357,7 @@ export default function MypageSpaceDetail() {
                 </div>
                 <div className="min-h-[5%] flex items-center gap-8 justify-end bg-zinc-800 px-4">
                   <button onClick={handleCriticState}>
-                    헌재 : {postDetail?.isOpenCritic ? "공개" : "비공개"} 상태
+                    헌재: {postDetail?.isOpenCritic ? "공개" : "비공개"} 상태
                   </button>
                   <button onClick={() => setIsEditing(!isEditing)}>
                     {isEditing ? "수정 취소" : "수정 하기"}

@@ -28,7 +28,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <FirebaseAuthProvider>
-          <header className="flex justify-between p-2 items-center h-[48px] min-h-[48px]  xl:h-[48px] sticky top-0 z-[15] bg-white">
+          <header className="w-full flex justify-between p-2 items-center h-[48px] min-h-[48px]  xl:h-[48px] fixed top-0 z-[15] bg-white">
             <h1>
               <Link href="/">Deo Web</Link>
             </h1>
@@ -36,7 +36,7 @@ export default function RootLayout({
               <HeaderUserStateComponent />
             </nav>
           </header>
-          <div className="h-calc-body  text-white bg-zinc-900">
+          <div className="h-calc-body pt-[48px]  text-white bg-zinc-900">
             <ReactQueryProvider>{children}</ReactQueryProvider>
           </div>
         </FirebaseAuthProvider>

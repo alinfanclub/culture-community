@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from "uuid";
 import { db } from "./firebase";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { DocumentData, collection, doc, getDocs, orderBy, query, serverTimestamp, setDoc, where } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 export async function createComment(
@@ -13,7 +13,7 @@ export async function createComment(
     user &&
       (await setDoc(doc(db, "comments", commentId), {
         createdAt: serverTimestamp(),
-        coomment: comment,
+        comment: comment,
         writer: user.uid,
         userInfos: {
           displayName: user.displayName,
@@ -28,3 +28,15 @@ export async function createComment(
 
   return commentId;
 }
+
+// 댓글 가져오기
+export async function getCommentData(postId: string): Promise<DocumentData[]> {
+  const q = query(collection(db, "comments"), where("hostPostId", "==", postId));
+  const querySnapshot = await getDocs(q);
+  let data: DocumentData[] = [];
+  querySnapshot.forEach((doc) => {
+    data.push(doc.data());
+  });
+  return data.sort((a, b) => { return b.createdAt - a.createdAt });
+}
+

@@ -132,7 +132,7 @@ export default function WritePage() {
           <p className="h-8 line  leading-[2rem]">{postInfo.name}</p>
         </div>
         <div
-          className="ql-editor viewer"
+          className="ql-editor viewer textView"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </div>

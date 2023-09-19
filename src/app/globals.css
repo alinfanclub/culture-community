@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply h-screen flex flex-col flex flex-col;
+  @apply h-screen flex flex-col flex flex-col bg-zinc-900;
 }
 body *::-webkit-scrollbar {
   width: 10px;
@@ -17,6 +17,9 @@ body *::-webkit-scrollbar-thumb {
 body *::-webkit-scrollbar-track {
   background-color: transparent;
   border-radius: 10px;
+}
+.textView {
+  @apply text-[3.3vw] xl:text-base
 }
 .ql-toolbar.ql-snow {
   border: none !important;

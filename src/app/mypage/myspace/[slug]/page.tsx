@@ -350,7 +350,7 @@ export default function MypageSpaceDetail() {
 
                 <div className="grow overflow-y-scroll px-4 pb-4">
                   <div
-                    className=" overflow-wrap break-words"
+                    className=" overflow-wrap break-words textView"
                     dangerouslySetInnerHTML={{ __html: postDetail?.content }}
                   />
                 </div>

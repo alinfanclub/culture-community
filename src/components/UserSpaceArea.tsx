@@ -73,7 +73,7 @@ export default function UserSpaceArea() {
           스페이스추가
         </button>
       </div>
-      <div className="xl:flex gap-4 py-2 flex-wrap justify-center grid grid-cols-2">
+      <div className="xl:flex gap-4 py-2 flex-wrap justify-center xl:justify-start grid grid-cols-2">
         {spaceArea
           .sort((a, b) => b.createdAt - a.createdAt)
           .map((data, index) => (

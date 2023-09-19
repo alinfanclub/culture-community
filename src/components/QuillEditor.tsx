@@ -6,9 +6,11 @@ import ReactQuill from "react-quill";
 export default function QuillEditor({
   html,
   handleHtmlChange,
+  placeholder,
 }: {
   html: string;
   handleHtmlChange?: (html: any) => void;
+  placeholder?: string;
 }) {
   const quillInstance = useRef<ReactQuill>(null);
 
@@ -52,7 +54,7 @@ export default function QuillEditor({
       modules={modules}
       formats={formats}
       value={html}
-      placeholder={"내용을 입력해주세요"}
+      placeholder={placeholder ? placeholder : "내용을 입력해주세요"}
       theme="snow"
     />
   );

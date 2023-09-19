@@ -94,18 +94,12 @@ export default function MypageSpaceDetail() {
   );
 
   const CriticSateMutation = useMutation(
-    ({
-      postId,
-      state,
-    }: {
-      postId: string;
-      state: boolean;
-    }) => updateCriticState(postId, state),
+    ({ postId, state }: { postId: string; state: boolean }) =>
+      updateCriticState(postId, state),
     {
       onSuccess: () => queryClient.invalidateQueries(["spacePostList"]),
     }
   );
-
 
   // ~ 수정하기 데이터 상태 저장
   const [postInfo, setPostInfo] = useState({
@@ -152,7 +146,7 @@ export default function MypageSpaceDetail() {
         {
           onSuccess: () => {
             setIsEditing(false);
-            queryClient.invalidateQueries(["postDetail", "spacePostList"]);
+            queryClient.invalidateQueries(["spacePostList"]);
           },
         }
       );
@@ -187,11 +181,14 @@ export default function MypageSpaceDetail() {
 
   const handleCriticState = () => {
     try {
-      CriticSateMutation.mutate({postId: postDetail?.postId, state: postDetail?.isOpenCritic})
+      CriticSateMutation.mutate({
+        postId: postDetail?.postId,
+        state: postDetail?.isOpenCritic,
+      });
     } catch (error) {
-      console.log("cirtic state error")
+      console.log("cirtic state error");
     }
-  }
+  };
 
   // ~ 수정하기 데이터 상태 저장
   const handleChange = (
@@ -220,7 +217,9 @@ export default function MypageSpaceDetail() {
   return (
     spaceArea && (
       <>
-        <section className={`text-white w-[95%] xl:w-[90%] mx-auto flex flex-col h-fit`}>
+        <section
+          className={`text-white w-[95%] xl:w-[90%] mx-auto flex flex-col h-fit`}
+        >
           <article
             className={`w-full h-20 xl:h-20 overflow-hidden relative flex justify-center items-center mx-auto bg-white`}
           >
@@ -269,14 +268,14 @@ export default function MypageSpaceDetail() {
             </div>
           </article>
           <article className="grid grid-cols-2 h-auto gap-4 xl:flex py-2 xl:grow xl:h-full">
-            {spacePostList.map((data, index) => (
+            {spacePostList?.map((data, index) => (
               <div
                 key={index}
                 onClick={() => {
                   setSelectedPostId(data.postId), setIsView(true);
                 }}
               >
-                <PostBlock data={data} key={index} />
+                <PostBlock data={data} key={index} displayState={true} />
               </div>
             ))}
           </article>

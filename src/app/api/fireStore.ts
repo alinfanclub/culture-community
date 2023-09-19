@@ -20,14 +20,10 @@ import axios from "axios";
 import {
   deleteObject,
   getDownloadURL,
-  getMetadata,
   getStorage,
   ref,
   uploadBytes,
-  uploadString,
 } from "firebase/storage";
-import { log } from "console";
-import ReactQuill from "react-quill";
 
 export async function setUserData(user: User): Promise<void> {
   await setDoc(doc(db, "account", user.uid), {
@@ -317,10 +313,7 @@ export async function updateCriticState(postId: string, state: boolean) {
 
 // ~ isOpenCritic가 true인 글 리스트 가져오기
 export async function getOpenCriticPostList(): Promise<DocumentData[]> {
-  const q = query(
-    collection(db, "posts"),
-    where("isOpenCritic", "==", true)
-  );
+  const q = query(collection(db, "posts"), where("isOpenCritic", "==", true));
   const querySnapshot = await getDocs(q);
   let postlist: DocumentData[] = [];
   querySnapshot.forEach((doc) => {
@@ -328,3 +321,5 @@ export async function getOpenCriticPostList(): Promise<DocumentData[]> {
   });
   return postlist;
 }
+
+//

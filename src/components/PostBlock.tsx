@@ -3,8 +3,15 @@ import { timeStampFormat } from "@/app/util/timeStampFormat";
 import { formatAgo } from "@/app/util/timeago";
 import { DocumentData } from "firebase/firestore";
 import Image from "next/image";
+import { GoDotFill } from "react-icons/go";
 
-export default function PostBlock({ data }: { data: DocumentData }) {
+export default function PostBlock({
+  data,
+  displayState,
+}: {
+  data: DocumentData;
+  displayState?: boolean;
+}) {
   return (
     <div className="w-auto xl:w-60 rounded-2xl text-white h-fit">
       {/* <Link href={`/mypage/mypost/${data.postId}`}>
@@ -37,6 +44,15 @@ export default function PostBlock({ data }: { data: DocumentData }) {
             <small>{formatAgo(timeStampFormat(data.createdAt))}</small>
           </div>
         </div>
+        {displayState && (
+          <div>
+            {data.isOpenCritic ? (
+              <GoDotFill className=" text-green-400" />
+            ) : (
+              <GoDotFill className="text-red-400" />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

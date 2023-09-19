@@ -144,7 +144,7 @@ export default function HeaderUserStateComponent() {
         <div className="fixed top-0 left-0 w-screen h-screen bg-neutral-500 p-4  backdrop-blur-4xl opacity-50 z-20 "></div>
       ) : null}
       {isLogin || isSignUp ? (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-neutral-100 p-4 rounded-2xl z-20">
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-neutral-100 p-4 rounded-2xl z-20">
           {isLogin && (
             <LoginModal handleLoginModalState={handleLoginModalState} />
           )}

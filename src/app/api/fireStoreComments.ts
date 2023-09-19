@@ -1,6 +1,6 @@
 import { v1 as uuidv1 } from "uuid";
 import { db } from "./firebase";
-import { DocumentData, collection, doc, getDocs, orderBy, query, serverTimestamp, setDoc, where } from "firebase/firestore";
+import { DocumentData, collection, deleteDoc, doc, getDocs, orderBy, query, serverTimestamp, setDoc, where } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
 export async function createComment(
@@ -40,3 +40,6 @@ export async function getCommentData(postId: string): Promise<DocumentData[]> {
   return data.sort((a, b) => { return b.createdAt - a.createdAt });
 }
 
+export async function deleteComment(commentId: string) {
+  await deleteDoc(doc(db, "comments", commentId));
+}

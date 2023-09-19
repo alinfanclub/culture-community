@@ -3,7 +3,7 @@
 import { getPostDetailData } from "@/app/api/fireStore";
 import ClipSpinner from "@/components/common/ClipSpinner";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { TfiMenuAlt } from "react-icons/tfi";
 import QuillEditor from "@/components/QuillEditor";
@@ -11,9 +11,7 @@ import Avvvatars from "avvvatars-react";
 import { useAuthContext } from "@/app/context/FirebaseAuthContext";
 import Image from "next/image";
 import SubmitBtn from "@/components/common/SubmitBtn";
-import { createComment, getCommentData } from "@/app/api/fireStoreComments";
-import { comment } from "postcss";
-import { set } from "firebase/database";
+import { createComment, deleteComment, getCommentData } from "@/app/api/fireStoreComments";
 
 export default function PostDetailPage() {
   const queryClient = useQueryClient();
@@ -21,6 +19,7 @@ export default function PostDetailPage() {
   const [isView, setIsView] = useState(false);
   const [html, setHtml] = useState("");
   const { user } = useAuthContext();
+  let displayName: string = user?.displayName ? user.displayName : "";
   const {
     data: postDetail,
     isLoading,
@@ -41,6 +40,12 @@ export default function PostDetailPage() {
     }
   )
 
+  const commentDeleteMutation = useMutation(
+    ({commentId}: {commentId: string}) => deleteComment(commentId), {
+      onSuccess: () => queryClient.invalidateQueries(["postDetailComments"]),
+    }
+  )
+
   const handleHtmlChange = (html: string) => {
     setHtml(html);
     console.log(html);
@@ -51,6 +56,10 @@ export default function PostDetailPage() {
     const postId = param.toString();
     commentCreateMutation.mutate({postId, html})
     setHtml("")
+  }
+
+  const handleCommentDelete = (commentId: string) => {
+    commentDeleteMutation.mutate({commentId})
   }
 
   if (isLoading || commentLoading) return <ClipSpinner color="#fff" />;
@@ -82,7 +91,7 @@ export default function PostDetailPage() {
             <>
               <div className="p-4 flex flex-col gap-4 w-full border-b-[1px] border-white">
                 <div>
-                  {user?.photoURL ? (
+                  { user?.photoURL ? (
                     <Image
                       src={user.photoURL}
                       alt="userImage"
@@ -90,7 +99,7 @@ export default function PostDetailPage() {
                       height={500}
                     />
                   ) : (
-                    <Avvvatars value="user.displayName" style="shape" />
+                    <Avvvatars value={displayName && displayName} style="shape" />
                   )}
                 </div>
                 <form onSubmit={handleCommnetCreate} className="w-full">
@@ -112,7 +121,9 @@ export default function PostDetailPage() {
           <div className="py-4 xl:overflow-y-auto flex flex-col gap-4 divide-y divide-white">
               {commentsData?.map((data, index) => (
                 <div key={index} className="flex flex-col gap-4 p-4">
-                  <div className='flex items-center gap-4'>
+                  <div className='flex justify-between items-center'>
+                    <div>
+                    <div className='flex items-center gap-4'>
                     {data.userInfos.photoURL ? (
                       <Image
                         src={data.userInfos.photoURL}
@@ -121,13 +132,16 @@ export default function PostDetailPage() {
                         height={500}
                       />
                     ) : (
-                      <Avvvatars value="user.displayName" style="shape" />
+                      <Avvvatars value={data.userInfos.displayName} style="shape" />
                     )}
                     <p>{data.userInfos.displayName}</p>
                   </div>
+                    </div>
+                    {user?.uid === data.writer && (<div onClick={() => handleCommentDelete(data.commentId)} className='cursor-pointer'>x</div>)}
+                  </div>
                   <div className="flex flex-col gap-2">
                     <div
-                      className="overflow-wrap break-words textView"
+                      className="overflow-wrap break-words "
                       dangerouslySetInnerHTML={{ __html: data.comment }}
                     />
                   </div>

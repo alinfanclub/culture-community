@@ -26,6 +26,7 @@ export default function HeaderUserStateComponent() {
     logout();
     router.push("/");
   };
+  let displayName: string = user?.displayName ? user.displayName : "";
 
   useEffect(() => {
     const btns = document.querySelectorAll(".btn");
@@ -62,7 +63,7 @@ export default function HeaderUserStateComponent() {
                 height={500}
               />
             ) : (
-              <Avvvatars value="user.displayName" style="shape" />
+              <Avvvatars value={displayName && displayName} style="shape" />
             )}
             <h1>{user.displayName}</h1>
             <button type="button" onClick={handleLogout}>

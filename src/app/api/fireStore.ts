@@ -307,9 +307,24 @@ export async function updatePost(
   });
 }
 
+// ~ 글 비평 열기 닫기
 export async function updateCriticState(postId: string, state: boolean) {
   const postRef = doc(db, "posts", postId);
   await updateDoc(postRef, {
     isOpenCritic: !state,
   });
+}
+
+// ~ isOpenCritic가 true인 글 리스트 가져오기
+export async function getOpenCriticPostList(): Promise<DocumentData[]> {
+  const q = query(
+    collection(db, "posts"),
+    where("isOpenCritic", "==", true)
+  );
+  const querySnapshot = await getDocs(q);
+  let postlist: DocumentData[] = [];
+  querySnapshot.forEach((doc) => {
+    postlist.push(doc.data());
+  });
+  return postlist;
 }

@@ -90,7 +90,7 @@ export default function WritePage() {
 
   return (
     <section className="flex h-full">
-      <div className="h-full w-full p-2 xl:p-6 bg-zinc-800 xl:w-1/2">
+      <div className="h-full w-full bg-zinc-800 xl:w-1/2">
         <form
           onSubmit={handleSubmitPost}
           className=" flex flex-col gap-2 h-full"
@@ -100,7 +100,7 @@ export default function WritePage() {
               type="text"
               name="title"
               onChange={handleChange}
-              className="bg-transparent w-full h-16"
+              className="bg-transparent w-full h-16  p-2 xl:p-6"
               placeholder="제목을 입력해주세요"
               required
             />
@@ -110,21 +110,21 @@ export default function WritePage() {
               type="text"
               name="name"
               onChange={handleChange}
-              className="bg-transparent w-full h-16"
+              className="bg-transparent w-full h-16  p-2 xl:p-6"
               required
               placeholder="이름을 입력해주세요"
             />
           </label>
-          <div className="h-full overflow-y-scroll mb-24">
+          <div className="grow overflow-y-scroll xl:mb-24  px-2 xl:px-6">
             <QuillEditor handleHtmlChange={handleHtmlChange} html={html} />
           </div>
-          <div className="w-full h-20 bg-zinc-700 flex gap-4 fixed left-0 bottom-0 p-2 2xl:p-6 box-border">
+          <div className="w-full h-20 bg-zinc-700 flex gap-4 p-2 2xl:p-6 box-border">
             <button type="submit">제출</button>
             <button type="button">임시저장</button>
           </div>
         </form>
       </div>
-      <div className="hidden w-1/2 xl:block overflow-y-scroll mb-24 p-2 xl:p-6">
+      <div className="hidden w-1/2 xl:block overflow-y-scroll xl:mb-24 p-2 xl:p-6">
         <div className="flex items-baseline gap-8 pb-10">
           <p className="h-16  line  leading-[4rem] text-2xl">
             {postInfo.title}

@@ -6,6 +6,7 @@ import {
   getPostDetailData,
   getSpaceDataDetail,
   getSpacePostList,
+  updateCriticState,
   updatePost,
   userSpaceBgUpdate,
 } from "@/app/api/fireStore";
@@ -38,6 +39,30 @@ export default function MypageSpaceDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<string>("");
 
+  const {
+    data: spaceArea,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["spaceAreaDetail"],
+    queryFn: () => getSpaceDataDetail(param.toString()),
+  });
+
+  const {
+    data: spacePostList = [],
+    isLoading: spacePostListLoading,
+    isError: spacePostListError,
+  } = useQuery({
+    queryKey: ["spacePostList"],
+    queryFn: () => getSpacePostList(param.toString()),
+  });
+
+  const { data: postDetail } = useQuery({
+    queryKey: ["spacePostList", selectedPostId],
+    queryFn: () => getPostDetailData(selectedPostId),
+    enabled: !!setSelectedPostId,
+  });
+
   const uploadBgImage = useMutation(
     ({ file, param }: { file: any; param: string }) =>
       userSpaceBgUpdate(file, param),
@@ -68,54 +93,21 @@ export default function MypageSpaceDetail() {
     }
   );
 
-  const handleFileChange = (
-    e: React.ChangeEvent<EventTarget & HTMLInputElement>
-  ) => {
-    e.preventDefault();
-    const selectedFile = e.target.files;
-    //
+  const CriticSateMutation = useMutation(
+    ({
+      postId,
+      state,
+    }: {
+      postId: string;
+      state: boolean;
+    }) => updateCriticState(postId, state),
+    {
+      onSuccess: () => queryClient.invalidateQueries(["spacePostList"]),
+    }
+  );
 
-    setCustomLoading(true);
-    spaceArea && deleteOldImage(spaceArea.backgroundImage);
-    uploadBgImage.mutate(
-      { file: selectedFile, param: param.toString() },
-      {
-        onSuccess() {
-          setCustomLoading(false);
-          alert("사진이 변경되었습니다.");
-        },
-        onError() {
-          setCustomLoading(false);
-          alert("사진 변경에 실패하였습니다.");
-        },
-      }
-    );
-  };
 
-  const {
-    data: spaceArea,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["spaceAreaDetail"],
-    queryFn: () => getSpaceDataDetail(param.toString()),
-  });
-
-  const {
-    data: spacePostList = [],
-    isLoading: spacePostListLoading,
-    isError: spacePostListError,
-  } = useQuery({
-    queryKey: ["spacePostList"],
-    queryFn: () => getSpacePostList(param.toString()),
-  });
-
-  const { data: postDetail } = useQuery({
-    queryKey: ["spacePostList", selectedPostId],
-    queryFn: () => getPostDetailData(selectedPostId),
-    enabled: !!setSelectedPostId,
-  });
-
+  // ~ 수정하기 데이터 상태 저장
   const [postInfo, setPostInfo] = useState({
     title: postDetail?.title,
     name: postDetail?.author,
@@ -169,6 +161,39 @@ export default function MypageSpaceDetail() {
     }
   };
 
+  const handleFileChange = (
+    e: React.ChangeEvent<EventTarget & HTMLInputElement>
+  ) => {
+    e.preventDefault();
+    const selectedFile = e.target.files;
+    //
+
+    setCustomLoading(true);
+    spaceArea && deleteOldImage(spaceArea.backgroundImage);
+    uploadBgImage.mutate(
+      { file: selectedFile, param: param.toString() },
+      {
+        onSuccess() {
+          setCustomLoading(false);
+          alert("사진이 변경되었습니다.");
+        },
+        onError() {
+          setCustomLoading(false);
+          alert("사진 변경에 실패하였습니다.");
+        },
+      }
+    );
+  };
+
+  const handleCriticState = () => {
+    try {
+      CriticSateMutation.mutate({postId: postDetail?.postId, state: postDetail?.isOpenCritic})
+    } catch (error) {
+      console.log("cirtic state error")
+    }
+  }
+
+  // ~ 수정하기 데이터 상태 저장
   const handleChange = (
     e: React.ChangeEvent<EventTarget & HTMLInputElement>
   ) => {
@@ -176,11 +201,12 @@ export default function MypageSpaceDetail() {
     setPostInfo((item) => ({ ...item, [name]: value }));
     console.log(postInfo);
   };
-
+  // ~ 수정하기 데이터 상태 저장
   const handleHtmlChange = (html: string) => {
     setHtml(html);
   };
 
+  // ~ 수정하기 데이터 상태 저장
   useEffect(() => {
     if (postDetail) {
       setPostInfo({ title: postDetail.title, name: postDetail.author });
@@ -194,7 +220,7 @@ export default function MypageSpaceDetail() {
   return (
     spaceArea && (
       <>
-        <section className={`text-white w-[90%] mx-auto flex flex-col h-fit`}>
+        <section className={`text-white w-[95%] xl:w-[90%] mx-auto flex flex-col h-fit`}>
           <article
             className={`w-full h-20 xl:h-20 overflow-hidden relative flex justify-center items-center mx-auto bg-white`}
           >
@@ -265,7 +291,7 @@ export default function MypageSpaceDetail() {
           }}
         ></div>
         {
-          <div
+          <article
             className={`w-full xl:w-[50%] fixed ${
               isView ? "top-0 right-0" : "top-0 -right-[100%]"
             } transition-all bg-zinc-900 h-full  text-white z-[30] flex flex-col`}
@@ -323,13 +349,16 @@ export default function MypageSpaceDetail() {
                   </p>
                 </div>
 
-                <div className="grow overflow-y-scroll px-4">
+                <div className="grow overflow-y-scroll px-4 pb-4">
                   <div
                     className=" overflow-wrap break-words"
                     dangerouslySetInnerHTML={{ __html: postDetail?.content }}
                   />
                 </div>
                 <div className="min-h-[5%] flex items-center gap-8 justify-end bg-zinc-800 px-4">
+                  <button onClick={handleCriticState}>
+                    헌재 : {postDetail?.isOpenCritic ? "공개" : "비공개"} 상태
+                  </button>
                   <button onClick={() => setIsEditing(!isEditing)}>
                     {isEditing ? "수정 취소" : "수정 하기"}
                   </button>
@@ -347,7 +376,7 @@ export default function MypageSpaceDetail() {
             >
               x
             </button>
-          </div>
+          </article>
         }
       </>
     )

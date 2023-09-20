@@ -51,7 +51,7 @@ export default function HeaderUserStateComponent() {
     <>
       <section className="hidden xl:flex gap-4 items-center">
         <Link href="/cultureinfo">CultureInfo</Link>
-        {authToken && mounted ?  (
+        {authToken && mounted &&  (
           <div className="flex gap-4 items-center">
             <Link href="/mypage">마이페이지</Link>
             {user?.photoURL ? (
@@ -70,7 +70,7 @@ export default function HeaderUserStateComponent() {
               로그아웃
             </button>
           </div>
-        ) : (
+        ) } {!mounted &&(
           <div className="flex gap-4">
             <button onClick={() => handleLoginModalState()} type="button">
               로그인

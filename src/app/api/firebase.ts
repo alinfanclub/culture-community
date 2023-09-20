@@ -29,8 +29,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const provider = new GoogleAuthProvider();
 
-export function loginGoogle() {
-  signInWithPopup(auth, provider).catch((error) => {
+export async function loginGoogle() {
+  await signInWithPopup(auth, provider).catch((error) => {
     const errorMessage = error.message;
     console.log(errorMessage);
   });

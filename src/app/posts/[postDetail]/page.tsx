@@ -54,8 +54,8 @@ export default function PostDetailPage() {
   const handleCommnetCreate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const postId = param.toString();
-    
-    if(!html) return alert('내용을 입력해주세요')
+
+    if(!html || html === "" || html === "<p><br></p>") return alert('내용을 입력해주세요')
     commentCreateMutation.mutate({postId, html})
     setHtml("")
   }
@@ -99,6 +99,7 @@ export default function PostDetailPage() {
                       alt="userImage"
                       width={500}
                       height={500}
+                      className='w-8 aspect-square rounded-full'
                     />
                   ) : (
                     <Avvvatars value={displayName && displayName} style="shape" />
@@ -139,6 +140,7 @@ export default function PostDetailPage() {
                         alt="userImage"
                         width={500}
                         height={500}
+                        className='w-8 aspect-square rounded-full'
                       />
                     ) : (
                       <Avvvatars value={data.userInfos.displayName} style="shape" />

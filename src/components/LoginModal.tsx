@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { FirebaseError } from "firebase/app";
 import { useRouter } from "next/navigation";
-import { loginUser } from "@/app/api/firebase";
-
+import { loginGoogle, loginUser } from "@/app/api/firebase";
 type LoginModalProps = {
   handleLoginModalState: () => void;
 };
@@ -19,6 +18,8 @@ export default function LoginModal({ handleLoginModalState }: LoginModalProps) {
     try {
       await loginUser(email, password).then(() => {
         handleLoginModalState();
+        setEmail("");
+        setPassword("");
       });
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -47,6 +48,21 @@ export default function LoginModal({ handleLoginModalState }: LoginModalProps) {
       console.log(error);
     }
   };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await loginGoogle().then(() => {
+        handleLoginModalState();
+      });
+    } catch (error) {
+      if (error) {
+        setErrorMessages("로그인에 실패했습니다.");
+        setTimeout(() => {
+          setErrorMessages("");
+        }, 3000);
+      } 
+    } 
+  }
 
   return (
     <div className="flex flex-col items-center justify-center h-full gap-4">
@@ -78,6 +94,7 @@ export default function LoginModal({ handleLoginModalState }: LoginModalProps) {
           >
             로그인
           </button>
+          <div onClick={handleGoogleLogin}>구글로 로그인</div>
           {errorMessages && <span>{errorMessages}</span>}
         </div>
       </form>

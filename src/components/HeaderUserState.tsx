@@ -60,6 +60,7 @@ export default function HeaderUserStateComponent() {
                 alt="userImage"
                 width={500}
                 height={500}
+                className='w-8 aspect-square rounded-full'
               />
             ) : null}
             
@@ -135,6 +136,7 @@ export default function HeaderUserStateComponent() {
                     alt="userImage"
                     width={500}
                     height={500}
+                    className='w-8 aspect-square rounded-full'
                   />
                 ) : (
                   <Avvvatars value="user.displayName" style="shape" size={70} />

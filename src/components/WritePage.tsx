@@ -56,7 +56,7 @@ export default function WritePage() {
     console.log(postInfo);
     console.log(html);
     try {
-      if (html) {
+      if (html && html !== "<p><br></p>") {
         deletePostMutation.mutate(
           {
             title: postInfo.title,

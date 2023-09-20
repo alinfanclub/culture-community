@@ -24,6 +24,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
+        <meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" />
         <Script src={KAKAO_SDK_URL} strategy="beforeInteractive" />
       </head>
       <body className={inter.className}>

@@ -84,11 +84,11 @@ export default function PostDetailPage() {
         </div>
       </article>
       <article
-        className={`xl:fixed top-[48px] right-0 w-full h-full transition-all mt-10 xl:mt-0 border-t-[1px] border-white xl:border-none xl:h-calc-body ${
-          isView ? "xl:w-[50%]" : "xl:w-[0%]"
+        className={`xl:fixed top-[48px] right-0 w-full h-full xl:h-calc-body transition-all mt-10 xl:mt-0 border-t-[1px] xl:border-t-0 ${
+          isView ? "xl:w-[50%] xl:border-l-[1px] border-white" : "xl:w-[0%]"
         }`}
       >
-        <section className="w-full transition-all bg-zinc-900 h-full  text-white z-[30] flex flex-col p-4 xl:border-l-[1px] border-white">
+        <section className="w-full transition-all bg-zinc-900 h-full  text-white z-[30] flex flex-col p-4 ">
           {postDetail?.isOpenCritic && (
             <>
               <div className="p-4 flex flex-col gap-4 w-full border-b-[1px] border-white">
@@ -161,7 +161,7 @@ export default function PostDetailPage() {
           </div>
         </section>
         <div
-          className="w-10 h-16 absolute -left-10 top-[5%]  rounded-l-xl border-white border flex items-center justify-center flex-col gap-2"
+          className="w-10 h-16 absolute -left-10 top-[5%]  rounded-l-xl border-white border flex items-center justify-center flex-col gap-2 bg-zinc-900 border-r-0  cursor-pointer"
           onClick={() => setIsView(!isView)}
         >
           <TfiMenuAlt />

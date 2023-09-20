@@ -26,6 +26,10 @@ import {
 import Cookies from "js-cookie";
 import PostBlock from "@/components/PostBlock";
 import QuillEditor from "@/components/QuillEditor";
+import { deleteComment, getCommentData } from "@/app/api/fireStoreComments";
+import { TfiMenuAlt } from "react-icons/tfi";
+import Avvvatars from "avvvatars-react";
+import { GoDotFill } from "react-icons/go";
 
 export default function MypageSpaceDetail() {
   const queryClient = useQueryClient();
@@ -34,6 +38,7 @@ export default function MypageSpaceDetail() {
   const { user } = useAuthContext();
   const router = useRouter();
   const [isView, setIsView] = useState(false);
+  const [isComment, setIsComment] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<string>("");
 
@@ -60,6 +65,12 @@ export default function MypageSpaceDetail() {
     queryFn: () => getPostDetailData(selectedPostId),
     enabled: !!setSelectedPostId,
   });
+
+  const {data: commentsData = [], isLoading: commentLoading, isError: commentError} = useQuery({
+    queryKey: ["postDetailComments", selectedPostId],
+    queryFn: () => getCommentData(selectedPostId),
+    enabled: !!setSelectedPostId,
+  })
 
   const uploadBgImage = useMutation(
     ({ file, param }: { file: any; param: string }) =>
@@ -98,6 +109,12 @@ export default function MypageSpaceDetail() {
       onSuccess: () => queryClient.invalidateQueries(["spacePostList"]),
     }
   );
+
+  const commentDeleteMutation = useMutation(
+    ({commentId}: {commentId: string}) => deleteComment(commentId), {
+      onSuccess: () => queryClient.invalidateQueries(["postDetailComments"]),
+    }
+  )
 
   // ~ 수정하기 데이터 상태 저장
   const [postInfo, setPostInfo] = useState({
@@ -201,6 +218,10 @@ export default function MypageSpaceDetail() {
     setHtml(html);
   };
 
+  const handleCommentDelete = (commentId: string) => {
+    commentDeleteMutation.mutate({commentId})
+  }
+
   // ~ 수정하기 데이터 상태 저장
   useEffect(() => {
     if (postDetail) {
@@ -284,7 +305,7 @@ export default function MypageSpaceDetail() {
             isView ? "opacity-100 z-30" : "opacity-0 -z-10"
           } bg-[rgba(0,0,0,0.5)] w-screen h-screen fixed top-0 left-0 transition-all]`}
           onClick={() => {
-            setIsView(false), setIsEditing(false);
+            setIsView(false), setIsEditing(false), setIsComment(false);
           }}
         ></div>
         {
@@ -352,10 +373,13 @@ export default function MypageSpaceDetail() {
                     dangerouslySetInnerHTML={{ __html: postDetail?.content }}
                   />
                 </div>
-                <div className="min-h-[5%] flex items-center gap-8 justify-end bg-zinc-800 px-4">
+                <div className="min-h-[5%] flex items-center gap-4 justify-end bg-zinc-800 px-4">
                   <button onClick={handleCriticState}>
-                    헌재: {postDetail?.isOpenCritic ? "공개" : "비공개"} 상태
+                    상태 변경  
                   </button>
+                  <div className='flex gap-2 items-center'>
+                  헌재: {postDetail?.isOpenCritic ? <GoDotFill className=" text-green-400" /> : <GoDotFill className=" text-red-400" /> }
+                  </div>
                   <button onClick={() => setIsEditing(!isEditing)}>
                     {isEditing ? "수정 취소" : "수정 하기"}
                   </button>
@@ -363,6 +387,62 @@ export default function MypageSpaceDetail() {
                     삭제
                   </button>
                 </div>
+
+
+          <div
+            className={`${
+              isComment ? "opacity-100 z-[31]" : "opacity-0 -z-10"
+            } bg-[rgba(0,0,0,0.8)] w-screen h-screen absolute top-0 left-0 transition-all]`}
+            onClick={() => {
+              setIsComment(false);
+            }}
+            ></div>
+                <article
+                    className={`absolute top-0 right-0 h-screen transition-all  xl:screen z-[32] ${
+                      isComment ? "w-[79%] xl:w-[79%] border-l-[1px] border-white" : " w-[0%]"
+                    }`}
+                  >
+                    <section className="w-full transition-all bg-zinc-900 h-full  text-white z-[30] flex flex-col p-4">
+                      <div className="py-4 xl:overflow-y-auto flex flex-col gap-4 divide-y divide-white">
+                          {commentsData?.map((data, index) => (
+                            <div key={index} className="flex flex-col gap-4 p-4">
+                              <div className='flex justify-between items-center'>
+                                <div>
+                                <div className='flex items-center gap-4'>
+                                {data.userInfos.photoURL ? (
+                                  <Image
+                                    src={data.userInfos.photoURL}
+                                    alt="userImage"
+                                    width={500}
+                                    height={500}
+                                    className='w-8 aspect-square rounded-full'
+                                  />
+                                ) : (
+                                  <Avvvatars value={data.userInfos.displayName} style="shape" />
+                                )}
+                                <p>{data.userInfos.displayName}</p>
+                              </div>
+                                </div>
+                                {user?.uid === data.writer && (<div onClick={() => handleCommentDelete(data.commentId)} className='cursor-pointer'>x</div>)}
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <div
+                                  className="overflow-wrap break-words "
+                                  dangerouslySetInnerHTML={{ __html: data.comment }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </section>
+                    <div
+                      className="w-10 h-16 absolute -left-10 top-[10%]  rounded-l-xl border-white border flex items-center justify-center flex-col gap-2 bg-zinc-900 border-r-0"
+                      onClick={() => setIsComment(!isComment)}
+                    >
+                      <TfiMenuAlt />
+                      <p>{commentsData? commentsData.length : "0"}</p>
+                    </div>
+                  </article>
               </div>
             )}
             <button

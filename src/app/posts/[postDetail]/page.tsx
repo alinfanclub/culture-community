@@ -54,6 +54,8 @@ export default function PostDetailPage() {
   const handleCommnetCreate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const postId = param.toString();
+    
+    if(!html) return alert('내용을 입력해주세요')
     commentCreateMutation.mutate({postId, html})
     setHtml("")
   }
@@ -104,14 +106,21 @@ export default function PostDetailPage() {
                 </div>
                 <form onSubmit={handleCommnetCreate} className="w-full">
                   <div className="w-full flex flex-col itmes-end gap-4">
-                    <div className="h-full min-h-[20rem] xl:min-h-[10rem]  max-h-60 overflow-y-auto border border-white rounded-2xl px-4 pb-4">
+                    {user && (
+                      <div className="h-full min-h-[20rem] xl:min-h-[10rem]  max-h-60 overflow-y-auto border border-white rounded-2xl px-4 pb-4">
                       <QuillEditor
                         html={html}
                         handleHtmlChange={handleHtmlChange}
                         placeholder={"여려분의 다양한 관점이 궁금해요"}
                       />
                     </div>
-                    <SubmitBtn text="비평 작성" style="mx-0 ml-auto" />
+                    )}
+                    {!user &&(
+                      <div className="h-full min-h-[20rem] xl:min-h-[10rem]  max-h-60 overflow-y-auto border border-white rounded-2xl px-4 pb-4 justify-center items-center flex">
+                       <p>비평은 로그인 후에 가능합니다</p>
+                    </div>
+                    )}
+                    <SubmitBtn text="비평 작성" style={`mx-0 ml-auto ${!user && "pointer-events-none"}`} />
                   </div>
                 </form>
               </div>

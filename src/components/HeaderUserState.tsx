@@ -9,22 +9,29 @@ import { useAuthContext } from "@/app/context/FirebaseAuthContext";
 import Link from "next/link";
 import Avvvatars from "avvvatars-react";
 import Image from "next/image";
-import ClipSpinner from "./common/ClipSpinner";
-import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 export default function HeaderUserStateComponent() {
-  const [userState, setUserState] = useState<User | null>(null);
   const [isLogin, setIsLogin] = useState<boolean>(false);
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
   const [isMenu, setIsMenu] = useState<boolean>(false);
+  const authToken = Cookies.get("authToken");
+  const [mounted, setMounted] = useState<boolean>(false);
   const { user } = useAuthContext();
-  const router = useRouter();
+  
+  useEffect(() => {
+    if(authToken) {
+      setMounted(true)
+    } else {
+      setMounted(false)
+    }
+  }, [authToken, user])
+
   const handleLoginModalState = () => setIsLogin(!isLogin);
   const handleSignUpModalState = () => setIsSignUp(!isSignUp);
-  const handleSetUser = (user: User) => setUserState(user);
   const handleLogout = () => {
     logout();
-    router.push("/");
+    // router.push("/");
   };
   let displayName: string = user?.displayName ? user.displayName : "";
 
@@ -38,11 +45,32 @@ export default function HeaderUserStateComponent() {
       });
     }
   }, [user]);
+
+
   return (
     <>
-      <div className="hidden xl:flex gap-4 items-center">
+      <section className="hidden xl:flex gap-4 items-center">
         <Link href="/cultureinfo">CultureInfo</Link>
-        {!user && (
+        {authToken && mounted ?  (
+          <div className="flex gap-4 items-center">
+            <Link href="/mypage">마이페이지</Link>
+            {user?.photoURL ? (
+              <Image
+                src={user?.photoURL}
+                alt="userImage"
+                width={500}
+                height={500}
+              />
+            ) : null}
+            
+            {user && !user.photoURL ? <Avvvatars value={displayName} style="shape" /> : null}
+            
+            <h1>{user?.displayName}</h1>
+            <button type="button" onClick={handleLogout}>
+              로그아웃
+            </button>
+          </div>
+        ) : (
           <div className="flex gap-4">
             <button onClick={() => handleLoginModalState()} type="button">
               로그인
@@ -52,26 +80,8 @@ export default function HeaderUserStateComponent() {
             </button>
           </div>
         )}
-        {user && (
-          <div className="flex gap-4 items-center">
-            <Link href="/mypage">마이페이지</Link>
-            {user.photoURL ? (
-              <Image
-                src={user.photoURL}
-                alt="userImage"
-                width={500}
-                height={500}
-              />
-            ) : (
-              <Avvvatars value={displayName && displayName} style="shape" />
-            )}
-            <h1>{user.displayName}</h1>
-            <button type="button" onClick={handleLogout}>
-              로그아웃
-            </button>
-          </div>
-        )}
-      </div>
+      </section>
+      <section>
       <div className="xl:hidden">
         <button onClick={() => setIsMenu(true)}>menu</button>
       </div>
@@ -141,6 +151,7 @@ export default function HeaderUserStateComponent() {
           )}
         </div>
       </div>
+      </section>
       {isLogin || isSignUp ? (
         <div className="fixed top-0 left-0 w-screen h-screen bg-neutral-500 p-4  backdrop-blur-4xl opacity-50 z-20 "></div>
       ) : null}
@@ -152,7 +163,6 @@ export default function HeaderUserStateComponent() {
           {isSignUp && (
             <SignupModal
               handleSignUpModalState={handleSignUpModalState}
-              handleSetUser={handleSetUser}
             />
           )}
         </div>

@@ -9,7 +9,7 @@ import { IdTokenResult } from "firebase/auth/cordova";
 export const FirebaseAuthContext = createContext<{
   user: User | null;
   loading: Boolean;
-  userToken: string;
+  userToken: string | null;
 }>({
   user: null,
   loading: false,
@@ -19,7 +19,7 @@ export const FirebaseAuthContext = createContext<{
 export const FirebaseAuthProvider = ({ children }: any) => {
   const [user, setUser] = useState<User | null>(null); // Again, replace with exact user type if available
   const [loading, setLoading] = useState<Boolean>(true);
-  const [userToken, setUserToken] = useState<string>("토큰없음");
+  const [userToken, setUserToken] = useState<string | null>(null);
   const router = useRouter();
   useEffect(() => {
     onUserStateChanged((user) => {
@@ -30,7 +30,7 @@ export const FirebaseAuthProvider = ({ children }: any) => {
         setUserToken(idToken); // 토큰 값을 설정
       });
     } else {
-      setUserToken("토큰없음"); // 로그아웃
+      setUserToken(null); // 로그아웃
     }
   }, [user, router]);
 

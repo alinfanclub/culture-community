@@ -7,12 +7,10 @@ import { User } from "firebase/auth";
 
 type SignupModalProps = {
   handleSignUpModalState: () => void;
-  handleSetUser: (user: User) => void;
 };
 
 export default function SignupModal({
   handleSignUpModalState,
-  handleSetUser,
 }: SignupModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +22,6 @@ export default function SignupModal({
     try {
       await createUser(email, password, userName).then((user) => {
         handleSignUpModalState();
-        handleSetUser(user);
       });
     } catch (error: unknown) {
       if (error instanceof Error) {

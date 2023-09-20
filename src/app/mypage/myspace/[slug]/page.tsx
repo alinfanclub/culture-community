@@ -19,13 +19,11 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  MutateOptions,
   useMutation,
   useQuery,
   useQueryClient,
 } from "react-query";
 import Cookies from "js-cookie";
-import { DocumentData } from "firebase/firestore";
 import PostBlock from "@/components/PostBlock";
 import QuillEditor from "@/components/QuillEditor";
 

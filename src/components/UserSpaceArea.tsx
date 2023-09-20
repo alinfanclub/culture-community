@@ -56,11 +56,12 @@ export default function UserSpaceArea() {
 
   useEffect(() => {
     const authToken = Cookies.get("authToken");
-
-    if (!authToken && authToken !== userToken) {
-      router.push("/"); // 쿠키가 없거나 로그인 상태가 아니면 메인 페이지로 리다이렉트
+    if (authToken === undefined) {
+      router.push("/");
+      console.log("redirect");
+      alert("로그인이 필요합니다.");
     }
-  }, [router, user, userToken]);
+  }, [router, user]);
 
   if (isLoading || customLoading) return <ClipSpinner color="#fff" />;
   if (isError) return <div>error</div>;

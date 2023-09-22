@@ -8,12 +8,14 @@ import { GoDotFill } from "react-icons/go";
 export default function PostBlock({
   data,
   displayState,
+  hadleDeletPost,
 }: {
   data: DocumentData;
   displayState?: boolean;
+  hadleDeletPost?: (postId: string) => void;
 }) {
   return (
-    <div className="w-auto xl:w-60 rounded-2xl text-white h-fit">
+    <div className="w-full  rounded-2xl text-white h-fit">
       {/* <Link href={`/mypage/mypost/${data.postId}`}>
         <div className="rounded-lg max-w-full image-thumbnail-crop-frame overflow-hidden flex items-center justify-center aspect-[4/2]">
           <Image
@@ -25,7 +27,7 @@ export default function PostBlock({
           />
         </div>
       </Link> */}
-      <div className="rounded-lg max-w-full image-thumbnail-crop-frame overflow-hidden flex items-center justify-center aspect-[4/2]">
+      {/* <div className="rounded-lg max-w-full image-thumbnail-crop-frame overflow-hidden flex items-center justify-center aspect-[4/2]">
         <Image
           src={data.backgroundImage}
           alt="spaceImage"
@@ -33,8 +35,7 @@ export default function PostBlock({
           height={500}
           className="rounded-br-[30%] h-full w-full object-cover"
         />
-        {/* <div>{data.content}</div> */}
-      </div>
+      </div> */}
       <div className="flex justify-between">
         <div>
           <h1>{data.title}</h1>

@@ -1,6 +1,6 @@
 "use client";
 
-import { createPost } from "@/app/api/fireStore";
+import { createPost, createPostContentOnly } from "@/app/api/fireStore";
 import { useParams, useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
@@ -17,11 +17,14 @@ export default function WritePage() {
     name: "",
   });
   const param = useParams().slug;
+  const postId = useParams().postId;
   const queryClient = useQueryClient();
+
+  console.log(postId);
 
   const handleHtmlChange = (html: string) => {
     setHtml(html);
-    console.log(html);
+    // createPostMutaitionOnlyContent.mutate({content: html, param: param.toString(), imgQuery: imgQuery ? imgQuery : "wave"})
   };
 
   const handleChange = (
@@ -32,7 +35,7 @@ export default function WritePage() {
     console.log(postInfo);
   };
 
-  const deletePostMutation = useMutation(
+  const createPostMutaition = useMutation(
     ({
       title,
       name,
@@ -51,13 +54,29 @@ export default function WritePage() {
     }
   );
 
+  const createPostMutaitionOnlyContent = useMutation(
+    ({
+      content,
+      param,
+      imgQuery,
+    }: {
+      content: string;
+      param: string;
+      imgQuery?: string;
+    }) => createPostContentOnly(param, imgQuery),
+    {
+      onSuccess: () => queryClient.invalidateQueries(["spacePostList"]),
+    }
+  );
+  
+
   const handleSubmitPost = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log(postInfo);
     console.log(html);
     try {
       if (html && html !== "<p><br></p>") {
-        deletePostMutation.mutate(
+        createPostMutaition.mutate(
           {
             title: postInfo.title,
             name: postInfo.name,
@@ -95,7 +114,7 @@ export default function WritePage() {
           onSubmit={handleSubmitPost}
           className=" flex flex-col gap-2 h-full"
         >
-          <label htmlFor="" className="">
+          {/* <label htmlFor="" className="">
             <input
               type="text"
               name="title"
@@ -114,14 +133,14 @@ export default function WritePage() {
               required
               placeholder="이름을 입력해주세요"
             />
-          </label>
+          </label> */}
           <div className="grow overflow-y-scroll xl:mb-24  px-2 xl:px-6">
             <QuillEditor handleHtmlChange={handleHtmlChange} html={html} />
           </div>
-          <div className="w-full h-20 bg-zinc-700 flex gap-4 p-2 2xl:p-6 box-border">
+          {/* <div className="w-full h-20 bg-zinc-700 flex gap-4 p-2 2xl:p-6 box-border">
             <button type="submit">제출</button>
             <button type="button">임시저장</button>
-          </div>
+          </div> */}
         </form>
       </div>
       <div className="hidden w-1/2 xl:block overflow-y-scroll xl:mb-24 p-2 xl:p-6">

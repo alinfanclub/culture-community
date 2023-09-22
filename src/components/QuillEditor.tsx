@@ -7,10 +7,12 @@ export default function QuillEditor({
   html,
   handleHtmlChange,
   placeholder,
+  name
 }: {
   html: string;
   handleHtmlChange?: (html: any) => void;
   placeholder?: string;
+  name?: string;
 }) {
   const quillInstance = useRef<ReactQuill>(null);
 

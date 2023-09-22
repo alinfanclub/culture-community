@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  createPostContentOnly,
   deleteOldImage,
   deletePost,
   getPostDetailData,
@@ -8,6 +9,9 @@ import {
   getSpacePostList,
   updateCriticState,
   updatePost,
+  updatePostContentOnly,
+  updateSPaceName,
+  updateTitle,
   userSpaceBgUpdate,
 } from "@/app/api/fireStore";
 import { useAuthContext } from "@/app/context/FirebaseAuthContext";
@@ -15,21 +19,15 @@ import { timeStampFormat } from "@/app/util/timeStampFormat";
 import { formatAgo } from "@/app/util/timeago";
 import ClipSpinner from "@/components/common/ClipSpinner";
 import Image from "next/image";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import Cookies from "js-cookie";
 import PostBlock from "@/components/PostBlock";
 import QuillEditor from "@/components/QuillEditor";
 import { deleteComment, getCommentData } from "@/app/api/fireStoreComments";
 import { TfiMenuAlt } from "react-icons/tfi";
 import Avvvatars from "avvvatars-react";
-import { GoDotFill } from "react-icons/go";
 
 export default function MypageSpaceDetail() {
   const queryClient = useQueryClient();
@@ -41,6 +39,14 @@ export default function MypageSpaceDetail() {
   const [isComment, setIsComment] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<string>("");
+  const [spaceTitleFix, setSpceTitleFix] = useState(false);
+  const [spaceTitle, setSpaceTitle] = useState("");
+  // ~ 수정하기 데이터 상태 저장
+  const [postInfo, setPostInfo] = useState({
+    title: "",
+    name: "",
+  });
+  const [html, setHtml] = useState("");
 
   const {
     data: spaceArea,
@@ -64,21 +70,21 @@ export default function MypageSpaceDetail() {
     queryKey: ["spacePostList", selectedPostId],
     queryFn: () => getPostDetailData(selectedPostId),
     enabled: !!setSelectedPostId,
+    onSuccess(data) {
+      setPostInfo({ title: data.title, name: data.author });
+      setHtml(data.content);
+    },
   });
 
-  const {data: commentsData = [], isLoading: commentLoading, isError: commentError} = useQuery({
+  const {
+    data: commentsData = [],
+    isLoading: commentLoading,
+    isError: commentError,
+  } = useQuery({
     queryKey: ["postDetailComments", selectedPostId],
     queryFn: () => getCommentData(selectedPostId),
     enabled: !!setSelectedPostId,
-  })
-
-  const uploadBgImage = useMutation(
-    ({ file, param }: { file: any; param: string }) =>
-      userSpaceBgUpdate(file, param),
-    {
-      onSuccess: () => queryClient.invalidateQueries(["spaceAreaDetail"]),
-    }
-  );
+  });
 
   const deletePostMutation = useMutation(
     ({ postId }: { postId: string }) => deletePost(postId),
@@ -87,21 +93,36 @@ export default function MypageSpaceDetail() {
     }
   );
 
-  const EditPostMutation = useMutation(
-    ({
-      postId,
-      postInfo,
-      content,
-    }: {
-      postId: string;
-      postInfo: { title: string; name: string };
-      content: string;
-    }) => updatePost(postId, postInfo, content),
+  // const uploadBgImage = useMutation(
+  //   ({ file, param }: { file: any; param: string }) =>
+  //     userSpaceBgUpdate(file, param),
+  //   {
+  //     onSuccess: () => queryClient.invalidateQueries(["spaceAreaDetail"]),
+  //   }
+  // );
+
+  // const EditPostMutation = useMutation(
+  //   ({
+  //     postId,
+  //     postInfo,
+  //     content,
+  //   }: {
+  //     postId: string;
+  //     postInfo: { title: string; name: string };
+  //     content: string;
+  //   }) => updatePost(postId, postInfo, content),
+  //   {
+  //     onSuccess: () => queryClient.invalidateQueries(["spacePostList"]),
+  //   }
+  // );
+
+  const SpaceTitleFixMutaion = useMutation(
+    ({ param, title }: { param: string; title: string }) =>
+      updateSPaceName(param, title),
     {
-      onSuccess: () => queryClient.invalidateQueries(["spacePostList"]),
+      onSuccess: () => queryClient.invalidateQueries(["spaceAreaDetail"]),
     }
   );
-
   const CriticSateMutation = useMutation(
     ({ postId, state }: { postId: string; state: boolean }) =>
       updateCriticState(postId, state),
@@ -111,17 +132,47 @@ export default function MypageSpaceDetail() {
   );
 
   const commentDeleteMutation = useMutation(
-    ({commentId}: {commentId: string}) => deleteComment(commentId), {
+    ({ commentId }: { commentId: string }) => deleteComment(commentId),
+    {
       onSuccess: () => queryClient.invalidateQueries(["postDetailComments"]),
     }
-  )
+  );
 
-  // ~ 수정하기 데이터 상태 저장
-  const [postInfo, setPostInfo] = useState({
-    title: postDetail?.title,
-    name: postDetail?.author,
-  });
-  const [html, setHtml] = useState(postDetail?.content);
+  const createPostMutaition = useMutation(
+    ({ param, imgQuery }: { param: string; imgQuery?: string }) =>
+      createPostContentOnly(param, imgQuery),
+    {
+      onSuccess: () => queryClient.invalidateQueries(["spacePostList"]),
+    }
+  );
+
+  const handleCreateContent = () => {
+    createPostMutaition.mutate(
+      {
+        param: param.toString(),
+      },
+      {
+        onSuccess: (data) => {
+          setSelectedPostId(data);
+        },
+      }
+    );
+  };
+
+  const updateTitleMutation = useMutation(
+    ({
+      postId,
+      postInfo,
+    }: {
+      postId: string;
+      postInfo: { title: string; name: string };
+    }) => updateTitle(postId, postInfo)
+  );
+
+  const updateContentMutation = useMutation(
+    ({ postId, content }: { postId: string; content: string }) =>
+      updatePostContentOnly(postId, content)
+  );
 
   useEffect(() => {
     const authToken = Cookies.get("authToken");
@@ -134,65 +185,67 @@ export default function MypageSpaceDetail() {
 
   const hadleDeletPost = (postId: string) => {
     try {
-      window.confirm("삭제하시겠습니까?")
-        ? deletePostMutation.mutate(
-            { postId },
-            {
-              onSuccess: () => {
-                setIsView(false);
-              },
-            }
-          )
-        : false;
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleSubmitPost = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      EditPostMutation.mutate(
-        {
-          postId: postDetail?.postId,
-          postInfo,
-          content: html,
-        },
-        {
-          onSuccess: () => {
-            setIsEditing(false);
-            queryClient.invalidateQueries(["spacePostList"]);
-          },
-        }
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleFileChange = (
-    e: React.ChangeEvent<EventTarget & HTMLInputElement>
-  ) => {
-    e.preventDefault();
-    const selectedFile = e.target.files;
-    //
-
-    setCustomLoading(true);
-    spaceArea && deleteOldImage(spaceArea.backgroundImage);
-    uploadBgImage.mutate(
-      { file: selectedFile, param: param.toString() },
-      {
-        onSuccess() {
-          setCustomLoading(false);
-          alert("사진이 변경되었습니다.");
-        },
-        onError() {
-          setCustomLoading(false);
-          alert("사진 변경에 실패하였습니다.");
-        },
+      if (window.confirm("삭제하시겠습니까?")) {
+        deletePostMutation.mutate(
+          { postId },
+          {
+            onSuccess: () => {
+              setIsView(false);
+              setSelectedPostId("");
+            },
+          }
+        );
       }
-    );
+      return false;
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+  // const handleSubmitPost = async (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   try {
+  //     EditPostMutation.mutate(
+  //       {
+  //         postId: postDetail?.postId,
+  //         postInfo,
+  //         content: html,
+  //       },
+  //       {
+  //         onSuccess: () => {
+  //           setIsEditing(false);
+  //           queryClient.invalidateQueries(["spacePostList"]);
+  //         },
+  //       }
+  //     );
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  // const handleFileChange = (
+  //   e: React.ChangeEvent<EventTarget & HTMLInputElement>
+  // ) => {
+  //   e.preventDefault();
+  //   const selectedFile = e.target.files;
+  //   //
+
+  //   setCustomLoading(true);
+  //   spaceArea && deleteOldImage(spaceArea.backgroundImage);
+  //   uploadBgImage.mutate(
+  //     { file: selectedFile, param: param.toString() },
+  //     {
+  //       onSuccess() {
+  //         setCustomLoading(false);
+  //         alert("사진이 변경되었습니다.");
+  //       },
+  //       onError() {
+  //         setCustomLoading(false);
+  //         alert("사진 변경에 실패하였습니다.");
+  //       },
+  //     }
+  //   );
+  // };
 
   const handleCriticState = () => {
     try {
@@ -206,29 +259,65 @@ export default function MypageSpaceDetail() {
   };
 
   // ~ 수정하기 데이터 상태 저장
-  const handleChange = (
+  const handleChange = async (
     e: React.ChangeEvent<EventTarget & HTMLInputElement>
   ) => {
     const { name, value } = e.target;
-    setPostInfo((item) => ({ ...item, [name]: value }));
-    console.log(postInfo);
+    setPostInfo((postInfo) => ({ ...postInfo, [name]: value }));
+    const texts = {
+      title: postInfo.title,
+      author: postInfo.name,
+    };
+    name === "title" ? (texts.title = value) : (texts.author = value);
+    updateTitleMutation.mutate({
+      postId: postDetail?.postId,
+      postInfo: { title: texts.title, name: texts.author },
+    });
   };
   // ~ 수정하기 데이터 상태 저장
   const handleHtmlChange = (html: string) => {
     setHtml(html);
+    const texts = {
+      html: html,
+    };
+    updateContentMutation.mutate({
+      postId: postDetail?.postId,
+      content: texts.html,
+    });
   };
 
   const handleCommentDelete = (commentId: string) => {
-    commentDeleteMutation.mutate({commentId})
-  }
+    commentDeleteMutation.mutate({ commentId });
+  };
+
+  const handleSpaceTitleFix = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      setSpceTitleFix(!spaceTitleFix);
+      SpaceTitleFixMutaion.mutate({
+        param: param.toString(),
+        title: spaceTitle,
+      });
+    }
+  };
+
+  const handleBlurSpaceTitleFix = () => {
+    setSpceTitleFix(!spaceTitleFix);
+    SpaceTitleFixMutaion.mutate({
+      param: param.toString(),
+      title: spaceTitle,
+    });
+  };
+
+  const handlePostInfoBlur = () => {
+    queryClient.invalidateQueries(["spacePostList"]);
+  };
 
   // ~ 수정하기 데이터 상태 저장
   useEffect(() => {
-    if (postDetail) {
-      setPostInfo({ title: postDetail.title, name: postDetail.author });
-      setHtml(postDetail.content);
-    }
-  }, [isEditing, postDetail]);
+    // setPostInfo({ title: postDetail?.title, name: postDetail?.author });
+    // setHtml(postDetail?.content);
+    setSpaceTitle(spaceArea?.title);
+  }, [postDetail, spaceArea]);
 
   if (isLoading || spacePostListLoading) return <div>loading</div>;
   if (isError || spacePostListError) return <div>error</div>;
@@ -237,9 +326,9 @@ export default function MypageSpaceDetail() {
     spaceArea && (
       <>
         <section
-          className={`text-white w-[95%] xl:w-[90%] mx-auto flex flex-col h-fit`}
+          className={`text-white w-[95%] xl:w-[90%] mx-auto flex flex-col h-full max-h-screen`}
         >
-          <article
+          {/* <article
             className={`w-full h-20 xl:h-20 overflow-hidden relative flex justify-center items-center mx-auto bg-white`}
           >
             <Image
@@ -263,11 +352,28 @@ export default function MypageSpaceDetail() {
               사진변경
             </label>
             {customLoading && <ClipSpinner color="#fff" />}
-          </article>
+          </article> */}
           <article id="spaceBody" className={`h-fit xl:h-[10%]`}>
             <div className="flex xl:items-center justify-between py-4 border-b-2 border-white items-start">
               <div className="flex gap-4 xl:items-end flex-col xl:flex-row">
-                <h1 className="text-3xl">{spaceArea.title}</h1>
+                {spaceTitleFix ? (
+                  <input
+                    type="text"
+                    className="bg-transparent text-3xl w-fit"
+                    autoFocus
+                    value={spaceTitle}
+                    onKeyDown={handleSpaceTitleFix}
+                    onChange={(e) => setSpaceTitle(e.target.value)}
+                    onBlur={handleBlurSpaceTitleFix}
+                  />
+                ) : (
+                  <h1
+                    className="text-3xl"
+                    onDoubleClick={() => setSpceTitleFix(!spaceTitleFix)}
+                  >
+                    {spaceArea.title}
+                  </h1>
+                )}
                 <div className="flex gap-4 items-end">
                   <p>{timeStampFormat(spaceArea.createdAt)}</p>
                   <small>
@@ -275,164 +381,119 @@ export default function MypageSpaceDetail() {
                   </small>
                 </div>
               </div>
-              <Link
-                href={{
-                  pathname: "/mypage/[slug]",
-                  query: { slug: param },
-                }}
-                as={`/mypage/${param}`}
-              >
-                글작성
-              </Link>
+              <button onClick={handleCreateContent}>글 작성</button>
             </div>
           </article>
-          <article className="grid grid-cols-2 h-auto gap-4 xl:flex py-2 xl:grow xl:h-full">
-            {spacePostList?.map((data, index) => (
-              <div
-                key={index}
-                onClick={() => {
-                  setSelectedPostId(data.postId), setIsView(true);
-                }}
-              >
-                <PostBlock data={data} key={index} displayState={true} />
-              </div>
-            ))}
-          </article>
-        </section>
-
-        <div
-          className={`${
-            isView ? "opacity-100 z-30" : "opacity-0 -z-10"
-          } bg-[rgba(0,0,0,0.5)] w-screen h-screen fixed top-0 left-0 transition-all]`}
-          onClick={() => {
-            setIsView(false), setIsEditing(false), setIsComment(false);
-          }}
-        ></div>
-        {
-          <article
-            className={`w-full xl:w-[50%] fixed ${
-              isView ? "top-0 right-0" : "top-0 -right-[100%]"
-            } transition-all bg-zinc-900 h-full  text-white z-[30] flex flex-col`}
-          >
-            {isEditing ? (
-              <div className="h-full w-full">
-                <form
-                  onSubmit={handleSubmitPost}
-                  className=" flex flex-col gap-2 h-full"
+          <article className="flex justify-between h-[90%] gap-10">
+            <div className="flex flex-col overflow-y-auto h-full min-h-full   w-[20%] bg-zinc-800">
+              {spacePostList?.map((data, index) => (
+                <div
+                  key={index}
+                  onClick={() => {
+                    setSelectedPostId(data.postId);
+                  }}
+                  className={`p-4 w-full border transition-all rounded-2xl ${
+                    selectedPostId === data.postId
+                      ? "bg-zinc-900 border-white"
+                      : "border-transparent"
+                  }`}
                 >
-                  <label htmlFor="" className="px-4">
+                  <PostBlock data={data} key={index} displayState={true} />
+                  <div className="flex items-center justify-between">
+                    <button onClick={handleCriticState}>
+                      {data.isOpenCritic ? "비공개하기" : "공개하기"}
+                    </button>
+                    <button onClick={() => hadleDeletPost(data.postId)}>
+                      삭제
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="h-full w-full overflow-y-scroll">
+              {selectedPostId !== "" && (
+                <>
+                  <label htmlFor="" className="">
                     <input
                       type="text"
                       name="title"
                       onChange={handleChange}
-                      className="bg-transparent w-full h-16"
+                      className="bg-transparent w-full h-16 border-none "
                       placeholder="제목을 입력해주세요"
                       required
-                      value={postInfo.title}
+                      value={postInfo?.title || ""}
+                      onBlur={handlePostInfoBlur}
                     />
                   </label>
-                  <label htmlFor="" className="px-4">
+                  <label htmlFor="" className="">
                     <input
                       type="text"
                       name="name"
                       onChange={handleChange}
-                      className="bg-transparent w-full h-16"
+                      className="bg-transparent w-full h-16 border-none "
                       placeholder="이름을 입력해주세요"
                       required
-                      value={postInfo.name}
+                      value={postInfo?.name || ""}
+                      onBlur={handlePostInfoBlur}
                     />
                   </label>
-                  <div className="h-full overflow-y-scroll px-4">
+                  <div className="h-auto">
                     <QuillEditor
                       html={html}
                       handleHtmlChange={handleHtmlChange}
                     />
                   </div>
-                  <div className="min-h-[5%] flex items-center gap-8 justify-end bg-zinc-800 px-4">
-                    <button onClick={() => setIsEditing(!isEditing)}>
-                      {isEditing ? "수정 취소" : "수정 하기"}
-                    </button>
-                    <button type="submit">제출</button>
-                  </div>
-                </form>
-              </div>
-            ) : (
-              <div className="h-full flex flex-col">
-                <div className="flex items-baseline gap-8 pb-10 px-4">
-                  <p className="h-16  line  leading-[4rem] text-2xl">
-                    {postDetail?.title}
-                  </p>
-                  <p className="h-8 line  leading-[2rem]">
-                    {postDetail?.author}
-                  </p>
-                </div>
 
-                <div className="grow overflow-y-scroll px-4 pb-4">
-                  <div
-                    className=" overflow-wrap break-words textView"
-                    dangerouslySetInnerHTML={{ __html: postDetail?.content }}
-                  />
-                </div>
-                <div className="min-h-[5%] flex items-center gap-4 justify-end bg-zinc-800 px-4">
-                  <button onClick={handleCriticState}>
-                    상태 변경  
-                  </button>
-                  <div className='flex gap-2 items-center'>
-                  헌재: {postDetail?.isOpenCritic ? <GoDotFill className=" text-green-400" /> : <GoDotFill className=" text-red-400" /> }
-                  </div>
-                  <button onClick={() => setIsEditing(!isEditing)}>
-                    {isEditing ? "수정 취소" : "수정 하기"}
-                  </button>
-                  <button onClick={() => hadleDeletPost(postDetail?.postId)}>
-                    삭제
-                  </button>
-                </div>
-
-
-          <div
-            className={`${
-              isComment ? "opacity-100 z-[31]" : "opacity-0 -z-10"
-            } bg-[rgba(0,0,0,0.8)] w-screen h-screen absolute top-0 left-0 transition-all]`}
-            onClick={() => {
-              setIsComment(false);
-            }}
-            ></div>
-                <article
-                    className={`absolute top-0 right-0 h-screen transition-all  xl:screen z-[32] ${
-                      isComment ? "w-[79%] xl:w-[79%] border-l-[1px] border-white" : " w-[0%]"
+                  <article
+                    className={`fixed top-0 right-0 h-screen transition-all  xl:screen z-[32] ${
+                      isComment
+                        ? "w-[79%] xl:w-[50%] border-l-[1px] border-white"
+                        : " w-[0%]"
                     }`}
                   >
                     <section className="w-full transition-all bg-zinc-900 h-full  text-white z-[30] flex flex-col p-4">
                       <div className="py-4 xl:overflow-y-auto flex flex-col gap-4 divide-y divide-white">
-                          {commentsData?.map((data, index) => (
-                            <div key={index} className="flex flex-col gap-4 p-4">
-                              <div className='flex justify-between items-center'>
-                                <div>
-                                <div className='flex items-center gap-4'>
+                        {commentsData?.map((data, index) => (
+                          <div key={index} className="flex flex-col gap-4 p-4">
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-4">
                                 {data.userInfos.photoURL ? (
                                   <Image
                                     src={data.userInfos.photoURL}
                                     alt="userImage"
                                     width={500}
                                     height={500}
-                                    className='w-8 aspect-square rounded-full'
+                                    className="w-8 aspect-square rounded-full"
                                   />
                                 ) : (
-                                  <Avvvatars value={data.userInfos.displayName} style="shape" />
+                                  <Avvvatars
+                                    value={data.userInfos.displayName}
+                                    style="shape"
+                                  />
                                 )}
                                 <p>{data.userInfos.displayName}</p>
                               </div>
-                                </div>
-                                {user?.uid === data.writer && (<div onClick={() => handleCommentDelete(data.commentId)} className='cursor-pointer'>x</div>)}
-                              </div>
-                              <div className="flex flex-col gap-2">
+                              {user?.uid === data.writer && (
                                 <div
-                                  className="overflow-wrap break-words "
-                                  dangerouslySetInnerHTML={{ __html: data.comment }}
-                                />
-                              </div>
+                                  onClick={() =>
+                                    handleCommentDelete(data.commentId)
+                                  }
+                                  className="cursor-pointer"
+                                >
+                                  x
+                                </div>
+                              )}
                             </div>
-                          ))}
+                            <div className="flex flex-col gap-2">
+                              <div
+                                className="overflow-wrap break-words "
+                                dangerouslySetInnerHTML={{
+                                  __html: data.comment,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </section>
                     <div
@@ -440,21 +501,14 @@ export default function MypageSpaceDetail() {
                       onClick={() => setIsComment(!isComment)}
                     >
                       <TfiMenuAlt />
-                      <p>{commentsData? commentsData.length : "0"}</p>
+                      <p>{commentsData ? commentsData.length : "0"}</p>
                     </div>
                   </article>
-              </div>
-            )}
-            <button
-              onClick={() => {
-                setIsView(false), setIsEditing(false);
-              }}
-              className="absolute top-4 right-4"
-            >
-              x
-            </button>
+                </>
+              )}
+            </div>
           </article>
-        }
+        </section>
       </>
     )
   );

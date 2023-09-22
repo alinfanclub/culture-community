@@ -168,6 +168,13 @@ export async function userSpaceBgUpdate(file: any, spaceId: any) {
   }
 }
 
+export async function updateSPaceName(spaceId: string, title: string) {
+  const postRef = doc(db, "spaces", spaceId);
+  await updateDoc(postRef, {
+    title: title,
+  });
+}
+
 // ~ 스페이스에서 이미지 수정시 기존의 이미지 삭제 하기
 export async function deleteOldImage(oldImageUrl: string) {
   const storage = getStorage();
@@ -217,6 +224,61 @@ export async function createPost(
   }
 
   return postId;
+}
+
+// !! 스페이스 생성
+export async function createPostContentOnly(
+  spaceId: string,
+  imgQuery?: string
+): Promise<string> {
+  const postId = uuidv1();
+  const user = getAuth().currentUser;
+  try {
+    user &&
+      (await setDoc(doc(db, "posts", postId), {
+        createdAt: serverTimestamp(),
+        title: "새 글",
+        author: user.displayName,
+        content: "",
+        userInfos: {
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+        },
+        postId: postId,
+        hostSpaceId: spaceId,
+        Useruid: user.uid,
+        fix: false,
+        backgroundImage: (
+          await getImageByQuery(imgQuery ? imgQuery : "wave")
+        ).toString(),
+        isOpenCritic: false,
+        istemporary: false,
+      }));
+  } catch (error) {
+    console.log(error);
+  }
+
+  return postId;
+}
+
+//!! 타이틀 작가 만 수정
+export async function updateTitle(
+  postId: string,
+  postInfo: { title: string; name: string }
+) {
+  const postRef = doc(db, "posts", postId);
+  await updateDoc(postRef, {
+    title: postInfo.title,
+    author: postInfo.name,
+  });
+}
+
+//  ! 글 수정
+export async function updatePostContentOnly(postId: string, content: string) {
+  const postRef = doc(db, "posts", postId);
+  await updateDoc(postRef, {
+    content: content,
+  });
 }
 
 export async function createTemporaryPost(

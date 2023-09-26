@@ -1,24 +1,22 @@
 import axios from "axios";
 import { XMLParser } from "fast-xml-parser";
 
-export async function getExhibitionPlaceList() {
+export async function getExhibitionPlaceList(now: string) {
   try {
-    const apikey =
-      "m3ho69kK58KuHNP7rPhql%2Fjgiy42xvyvwijPb5b4a5qfH9e0BDIIWAjZyTFjMn%2BoWh5TPMDNGkX24Pq5UfGflA%3D%3D";
+    const apikey = process.env.NEXT_PUBLIC_API_KEY_EXHIHIBITION_API_KEY;
     const res = await axios
       .get(
-        `https://apis.data.go.kr/6260000/BusanCultureExhibitService/getBusanCultureExhibit?serviceKey=${apikey}&pageNo=1&numOfRows=4000`
+        `https://cors-anywhere.herokuapp.com/http://www.culture.go.kr/openapi/rest/publicperformancedisplays/area?serviceKey=${apikey}&RequestTime=20230901:${now}&rows=10&keyword=미술`
       )
       .then((res) => {
         var xml = new XMLParser().parse(res.data);
-        const sortingData = xml.response.body.items.item
-          .map((item: any) => ({
+        console.log(xml);
+        const sortingData = xml.response.msgBody.perforList.map(
+          (item: any) => ({
             ...item,
-            sortNum: Number(item.op_st_dt.replace(/-/g, "")),
-          }))
-          .sort((a: any, b: any) => b.sortNum - a.sortNum)
-          .slice(0, 100);
-
+          })
+        );
+        console.log(sortingData);
         return sortingData;
       });
 

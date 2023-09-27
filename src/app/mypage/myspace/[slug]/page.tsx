@@ -20,7 +20,7 @@ import { formatAgo } from "@/app/util/timeago";
 import ClipSpinner from "@/components/common/ClipSpinner";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import Cookies from "js-cookie";
 import PostBlock from "@/components/PostBlock";
@@ -41,6 +41,9 @@ export default function MypageSpaceDetail() {
   const [selectedPostId, setSelectedPostId] = useState<string>("");
   const [spaceTitleFix, setSpceTitleFix] = useState(false);
   const [spaceTitle, setSpaceTitle] = useState("");
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [modalStyle, setModalStyle] = useState({});
+  const ModalElement = useRef<HTMLDivElement>(null);
   // ~ 수정하기 데이터 상태 저장
   const [postInfo, setPostInfo] = useState({
     title: "",
@@ -66,7 +69,11 @@ export default function MypageSpaceDetail() {
     queryFn: () => getSpacePostList(param.toString()),
   });
 
-  const { data: postDetail } = useQuery({
+  const {
+    data: postDetail,
+    isLoading: postDetailLoading,
+    isError: postDetailError,
+  } = useQuery({
     queryKey: ["spacePostList", selectedPostId],
     queryFn: () => getPostDetailData(selectedPostId),
     enabled: !!setSelectedPostId,
@@ -192,6 +199,7 @@ export default function MypageSpaceDetail() {
             onSuccess: () => {
               setIsView(false);
               setSelectedPostId("");
+              setIsOpenModal(!isOpenModal);
             },
           }
         );
@@ -249,10 +257,17 @@ export default function MypageSpaceDetail() {
 
   const handleCriticState = () => {
     try {
-      CriticSateMutation.mutate({
-        postId: postDetail?.postId,
-        state: postDetail?.isOpenCritic,
-      });
+      CriticSateMutation.mutate(
+        {
+          postId: postDetail?.postId,
+          state: postDetail?.isOpenCritic,
+        },
+        {
+          onSuccess: () => {
+            setIsOpenModal(!isOpenModal);
+          },
+        }
+      );
     } catch (error) {
       console.log("cirtic state error");
     }
@@ -312,6 +327,17 @@ export default function MypageSpaceDetail() {
     queryClient.invalidateQueries(["spacePostList"]);
   };
 
+  const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+    setIsOpenModal(!isOpenModal);
+    event.preventDefault();
+    setModalStyle({
+      top: `${event.clientY}px`,
+      left: `${event.clientX}px`,
+      position: "fixed",
+      zIndex: 1000,
+    });
+  };
+
   // ~ 수정하기 데이터 상태 저장
   useEffect(() => {
     // setPostInfo({ title: postDetail?.title, name: postDetail?.author });
@@ -319,8 +345,10 @@ export default function MypageSpaceDetail() {
     setSpaceTitle(spaceArea?.title);
   }, [postDetail, spaceArea]);
 
-  if (isLoading || spacePostListLoading) return <div>loading</div>;
-  if (isError || spacePostListError) return <div>error</div>;
+  if (isLoading || spacePostListLoading || postDetailLoading)
+    return <ClipSpinner color="#fff" />;
+  if (isError || spacePostListError || postDetailError)
+    return <ClipSpinner color="#fff" />;
 
   return (
     spaceArea && (
@@ -385,13 +413,14 @@ export default function MypageSpaceDetail() {
             </div>
           </article>
           <article className="flex justify-between h-[90%] gap-10">
-            <div className="flex flex-col overflow-y-auto h-full min-h-full   w-[20%] bg-zinc-800">
+            <div className="flex flex-col overflow-y-auto h-auto w-[20%]  min-w-[200px]    bg-zinc-800">
               {spacePostList?.map((data, index) => (
                 <div
                   key={index}
                   onClick={() => {
                     setSelectedPostId(data.postId);
                   }}
+                  onContextMenu={handleContextMenu}
                   className={`p-4 w-full border transition-all rounded-2xl ${
                     selectedPostId === data.postId
                       ? "bg-zinc-900 border-white"
@@ -399,14 +428,47 @@ export default function MypageSpaceDetail() {
                   }`}
                 >
                   <PostBlock data={data} key={index} displayState={true} />
-                  <div className="flex items-center justify-between">
+                  {/* <div className="flex items-center justify-between">
                     <button onClick={handleCriticState}>
                       {data.isOpenCritic ? "비공개하기" : "공개하기"}
                     </button>
                     <button onClick={() => hadleDeletPost(data.postId)}>
                       삭제
                     </button>
-                  </div>
+                  </div> */}
+                  {isOpenModal && (
+                    <>
+                      <div
+                        className="w-screen h-screen fixed top-0 left-0 bg-[rgba(0,0,0,0.3)] z-20"
+                        onClick={() => setIsOpenModal(!isOpenModal)}
+                      ></div>
+                      <div
+                        ref={ModalElement}
+                        style={modalStyle}
+                        id="modal"
+                        className="w-fit h-fit bg-white text-zinc-900 rounded-lg text-center flex items-center overflow-hidden"
+                      >
+                        <ul className="flex flex-col justify-stretch">
+                          <li className="hover:bg-zinc-300 p-4 hover:text-red-600  transition-all w-full flex justify-center">
+                            <button
+                              onClick={handleCriticState}
+                              className=" w-20 "
+                            >
+                              {data.isOpenCritic ? "비공개하기" : "공개하기"}
+                            </button>
+                          </li>
+                          <li className="hover:bg-zinc-300 p-4 hover:text-red-600  transition-all w-full flex justify-center">
+                            <button
+                              onClick={() => hadleDeletPost(data.postId)}
+                              className=" w-20 "
+                            >
+                              삭제
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>

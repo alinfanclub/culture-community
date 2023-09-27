@@ -13,7 +13,7 @@ import Cookies from "js-cookie";
 export default function UserSpaceArea() {
   const queryClient = useQueryClient();
   const [customLoading, setCustomLoading] = useState(false);
-  const { user, userToken } = useAuthContext();
+  const { user } = useAuthContext();
   const router = useRouter();
 
   const uploadNewPost = useMutation(

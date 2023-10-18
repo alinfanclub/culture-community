@@ -28,6 +28,7 @@ import QuillEditor from "@/components/QuillEditor";
 import { deleteComment, getCommentData } from "@/app/api/fireStoreComments";
 import { TfiMenuAlt } from "react-icons/tfi";
 import Avvvatars from "avvvatars-react";
+import { set } from "firebase/database";
 
 export default function MypageSpaceDetail() {
   const queryClient = useQueryClient();
@@ -327,17 +328,6 @@ export default function MypageSpaceDetail() {
     queryClient.invalidateQueries(["spacePostList"]);
   };
 
-  const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
-    setIsOpenModal(!isOpenModal);
-    event.preventDefault();
-    setModalStyle({
-      top: `${event.clientY}px`,
-      left: `${event.clientX}px`,
-      position: "fixed",
-      zIndex: 1000,
-    });
-  };
-
   // ~ 수정하기 데이터 상태 저장
   useEffect(() => {
     // setPostInfo({ title: postDetail?.title, name: postDetail?.author });
@@ -345,10 +335,8 @@ export default function MypageSpaceDetail() {
     setSpaceTitle(spaceArea?.title);
   }, [postDetail, spaceArea]);
 
-  if (isLoading || spacePostListLoading || postDetailLoading)
-    return <ClipSpinner color="#fff" />;
-  if (isError || spacePostListError || postDetailError)
-    return <ClipSpinner color="#fff" />;
+  if (isLoading || spacePostListLoading) return <ClipSpinner color="#fff" />;
+  if (isError || spacePostListError) return <ClipSpinner color="#fff" />;
 
   return (
     spaceArea && (
@@ -414,62 +402,21 @@ export default function MypageSpaceDetail() {
           </article>
           <article className="flex justify-between h-[90%] gap-10">
             <div className="flex flex-col overflow-y-auto h-auto w-[20%]  min-w-[200px]    bg-zinc-800">
-              {spacePostList?.map((data, index) => (
-                <div
+              {spacePostList.map((data, index) => (
+                <PostBlock
                   key={index}
-                  onClick={() => {
-                    setSelectedPostId(data.postId);
-                  }}
-                  onContextMenu={handleContextMenu}
-                  className={`p-4 w-full border transition-all rounded-2xl ${
-                    selectedPostId === data.postId
-                      ? "bg-zinc-900 border-white"
-                      : "border-transparent"
-                  }`}
-                >
-                  <PostBlock data={data} key={index} displayState={true} />
-                  {/* <div className="flex items-center justify-between">
-                    <button onClick={handleCriticState}>
-                      {data.isOpenCritic ? "비공개하기" : "공개하기"}
-                    </button>
-                    <button onClick={() => hadleDeletPost(data.postId)}>
-                      삭제
-                    </button>
-                  </div> */}
-                  {isOpenModal && (
-                    <>
-                      <div
-                        className="w-screen h-screen fixed top-0 left-0 bg-[rgba(0,0,0,0.3)] z-20"
-                        onClick={() => setIsOpenModal(!isOpenModal)}
-                      ></div>
-                      <div
-                        ref={ModalElement}
-                        style={modalStyle}
-                        id="modal"
-                        className="w-fit h-fit bg-white text-zinc-900 rounded-lg text-center flex items-center overflow-hidden"
-                      >
-                        <ul className="flex flex-col justify-stretch">
-                          <li className="hover:bg-zinc-300 p-4 hover:text-red-600  transition-all w-full flex justify-center">
-                            <button
-                              onClick={handleCriticState}
-                              className=" w-20 "
-                            >
-                              {data.isOpenCritic ? "비공개하기" : "공개하기"}
-                            </button>
-                          </li>
-                          <li className="hover:bg-zinc-300 p-4 hover:text-red-600  transition-all w-full flex justify-center">
-                            <button
-                              onClick={() => hadleDeletPost(data.postId)}
-                              className=" w-20 "
-                            >
-                              삭제
-                            </button>
-                          </li>
-                        </ul>
-                      </div>
-                    </>
-                  )}
-                </div>
+                  data={data}
+                  displayState={true}
+                  hadleDeletPost={hadleDeletPost}
+                  handleCriticState={handleCriticState}
+                  isOpenModal={isOpenModal}
+                  setIsOpenModal={setIsOpenModal}
+                  modalStyle={modalStyle}
+                  ModalElement={ModalElement}
+                  setSelectedPostId={setSelectedPostId}
+                  selectedPostId={selectedPostId}
+                  setModalStyle={setModalStyle}
+                />
               ))}
             </div>
             <div className="h-full w-full overflow-y-scroll">

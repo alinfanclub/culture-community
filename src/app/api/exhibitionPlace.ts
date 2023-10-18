@@ -6,7 +6,7 @@ export async function getExhibitionPlaceList(now: string) {
     const apikey = process.env.NEXT_PUBLIC_API_KEY_EXHIHIBITION_API_KEY;
     const res = await axios
       .get(
-        `https://cors-anywhere.herokuapp.com/http://www.culture.go.kr/openapi/rest/publicperformancedisplays/area?serviceKey=${apikey}&RequestTime=20230901:${now}&rows=10&keyword=미술`
+        `https://cors-anywhere.herokuapp.com/http://www.culture.go.kr/openapi/rest/publicperformancedisplays/area?serviceKey=${apikey}&from=20230901&to=20231001&rows=10&keyword=미술`
       )
       .then((res) => {
         var xml = new XMLParser().parse(res.data);

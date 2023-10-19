@@ -18,14 +18,14 @@ export default function HeaderUserStateComponent() {
   const authToken = Cookies.get("authToken");
   const [mounted, setMounted] = useState<boolean>(false);
   const { user } = useAuthContext();
-  
+
   useEffect(() => {
-    if(authToken) {
-      setMounted(true)
+    if (authToken) {
+      setMounted(true);
     } else {
-      setMounted(false)
+      setMounted(false);
     }
-  }, [authToken, user])
+  }, [authToken, user]);
 
   const handleLoginModalState = () => setIsLogin(!isLogin);
   const handleSignUpModalState = () => setIsSignUp(!isSignUp);
@@ -46,12 +46,10 @@ export default function HeaderUserStateComponent() {
     }
   }, [user]);
 
-
   return (
     <>
       <section className="hidden xl:flex gap-4 items-center">
-        <Link href="/cultureinfo">CultureInfo</Link>
-        {authToken && mounted &&  (
+        {authToken && mounted && (
           <div className="flex gap-4 items-center">
             <Link href="/mypage">마이페이지</Link>
             {user?.photoURL ? (
@@ -60,18 +58,21 @@ export default function HeaderUserStateComponent() {
                 alt="userImage"
                 width={500}
                 height={500}
-                className='w-8 aspect-square rounded-full'
+                className="w-8 aspect-square rounded-full"
               />
             ) : null}
-            
-            {user && !user.photoURL ? <Avvvatars value={displayName} style="shape" /> : null}
-            
+
+            {user && !user.photoURL ? (
+              <Avvvatars value={displayName} style="shape" />
+            ) : null}
+
             <h1>{user?.displayName}</h1>
             <button type="button" onClick={handleLogout}>
               로그아웃
             </button>
           </div>
-        ) } {!mounted &&(
+        )}{" "}
+        {!mounted && (
           <div className="flex gap-4">
             <button onClick={() => handleLoginModalState()} type="button">
               로그인
@@ -83,76 +84,80 @@ export default function HeaderUserStateComponent() {
         )}
       </section>
       <section>
-      <div className="xl:hidden">
-        <button onClick={() => setIsMenu(true)}>menu</button>
-      </div>
-      <div
-        className={`${
-          isMenu ? "opacity-100 block" : "opacity-0 hidden"
-        } bg-[rgba(0,0,0,0.5)] w-screen h-screen fixed top-0 left-0 transition-all xl:hidden`}
-        onClick={() => {
-          setIsMenu(false);
-        }}
-      ></div>
-      <div
-        className={`w-full xl:hidden fixed ${
-          isMenu ? "top-0 right-0" : "top-0 -right-[100%]"
-        } transition-all bg-zinc-900 h-screen p-4 px-6 text-white flex flex-col z-[20]`}
-      >
-        <div className="flex justify-between items-center mb-20">
-          <h1 className="text-3xl">
-            <Link href="/" className="btn">
-              Deo Web
-            </Link>
-          </h1>
-          <button onClick={() => setIsMenu(false)}>X</button>
+        <div className="xl:hidden">
+          <button onClick={() => setIsMenu(true)}>menu</button>
         </div>
-        <div className="flex flex-col gap-4 text-2xl min-h-[40%]">
-          <Link href="/cultureinfo" className="btn">
-            CultureInfo
-          </Link>
-          {user && (
-            <Link href="/mypage" className="btn">
-              마이페이지
+        <div
+          className={`${
+            isMenu ? "opacity-100 block" : "opacity-0 hidden"
+          } bg-[rgba(0,0,0,0.5)] w-screen h-screen fixed top-0 left-0 transition-all xl:hidden`}
+          onClick={() => {
+            setIsMenu(false);
+          }}
+        ></div>
+        <div
+          className={`w-full xl:hidden fixed ${
+            isMenu ? "top-0 right-0" : "top-0 -right-[100%]"
+          } transition-all bg-zinc-900 h-screen p-4 px-6 text-white flex flex-col z-[20]`}
+        >
+          <div className="flex justify-between items-center mb-20">
+            <h1 className="text-3xl">
+              <Link href="/" className="btn">
+                Deo Web
+              </Link>
+            </h1>
+            <button onClick={() => setIsMenu(false)}>X</button>
+          </div>
+          <div className="flex flex-col gap-4 text-2xl min-h-[40%]">
+            <Link href="/cultureinfo" className="btn">
+              CultureInfo
             </Link>
-          )}
-        </div>
-        <div className="text-2xl border-t-[1px] border-white pt-4">
-          {!user ? (
-            <div className="flex gap-8">
-              <button onClick={() => handleLoginModalState()} type="button">
-                로그인
-              </button>
-              <button onClick={() => setIsSignUp(true)} type="button">
-                회원가입
-              </button>
-            </div>
-          ) : (
-            <div className="flex gap-8  flex-col">
-              <div className="flex items-center gap-4">
-                {user.photoURL ? (
-                  <Image
-                    src={user.photoURL}
-                    alt="userImage"
-                    width={500}
-                    height={500}
-                    className='w-8 aspect-square rounded-full'
-                  />
-                ) : (
-                  <Avvvatars value="user.displayName" style="shape" size={70} />
-                )}
-                <h1>{user.displayName}</h1>
-              </div>
-              {/* <Link href="/mypage">마이페이지</Link> */}
-              <div className="border-t-[1px] border-white mt-20 pt-4">
-                <button type="button" onClick={handleLogout}>
-                  로그아웃
+            {user && (
+              <Link href="/mypage" className="btn">
+                마이페이지
+              </Link>
+            )}
+          </div>
+          <div className="text-2xl border-t-[1px] border-white pt-4">
+            {!user ? (
+              <div className="flex gap-8">
+                <button onClick={() => handleLoginModalState()} type="button">
+                  로그인
+                </button>
+                <button onClick={() => setIsSignUp(true)} type="button">
+                  회원가입
                 </button>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="flex gap-8  flex-col">
+                <div className="flex items-center gap-4">
+                  {user.photoURL ? (
+                    <Image
+                      src={user.photoURL}
+                      alt="userImage"
+                      width={500}
+                      height={500}
+                      className="w-8 aspect-square rounded-full"
+                    />
+                  ) : (
+                    <Avvvatars
+                      value="user.displayName"
+                      style="shape"
+                      size={70}
+                    />
+                  )}
+                  <h1>{user.displayName}</h1>
+                </div>
+                {/* <Link href="/mypage">마이페이지</Link> */}
+                <div className="border-t-[1px] border-white mt-20 pt-4">
+                  <button type="button" onClick={handleLogout}>
+                    로그아웃
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
       </section>
       {isLogin || isSignUp ? (
         <div className="fixed top-0 left-0 w-screen h-screen bg-neutral-500 p-4  backdrop-blur-4xl opacity-50 z-20 "></div>
@@ -163,9 +168,7 @@ export default function HeaderUserStateComponent() {
             <LoginModal handleLoginModalState={handleLoginModalState} />
           )}
           {isSignUp && (
-            <SignupModal
-              handleSignUpModalState={handleSignUpModalState}
-            />
+            <SignupModal handleSignUpModalState={handleSignUpModalState} />
           )}
         </div>
       ) : null}

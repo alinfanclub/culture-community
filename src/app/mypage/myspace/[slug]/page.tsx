@@ -28,23 +28,20 @@ import QuillEditor from "@/components/QuillEditor";
 import { deleteComment, getCommentData } from "@/app/api/fireStoreComments";
 import { TfiMenuAlt } from "react-icons/tfi";
 import Avvvatars from "avvvatars-react";
-import { set } from "firebase/database";
 
 export default function MypageSpaceDetail() {
   const queryClient = useQueryClient();
   const param = useParams().slug;
-  const [customLoading, setCustomLoading] = useState(false);
   const { user } = useAuthContext();
   const router = useRouter();
-  const [isView, setIsView] = useState(false);
   const [isComment, setIsComment] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<string>("");
   const [spaceTitleFix, setSpceTitleFix] = useState(false);
   const [spaceTitle, setSpaceTitle] = useState("");
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [modalStyle, setModalStyle] = useState({});
   const ModalElement = useRef<HTMLDivElement>(null);
+
   // ~ 수정하기 데이터 상태 저장
   const [postInfo, setPostInfo] = useState({
     title: "",
@@ -59,6 +56,7 @@ export default function MypageSpaceDetail() {
   } = useQuery({
     queryKey: ["spaceAreaDetail"],
     queryFn: () => getSpaceDataDetail(param.toString()),
+    cacheTime: 0,
   });
 
   const {
@@ -182,14 +180,14 @@ export default function MypageSpaceDetail() {
       updatePostContentOnly(postId, content)
   );
 
-  useEffect(() => {
-    const authToken = Cookies.get("authToken");
-    if (authToken === undefined) {
-      router.push("/");
-      console.log("redirect");
-      alert("로그인이 필요합니다.");
-    }
-  }, [router, user]);
+  // useEffect(() => {
+  //   const authToken = Cookies.get("authToken");
+  //   if (authToken === undefined) {
+  //     router.push("/");
+  //     console.log("redirect");
+  //     alert("로그인이 필요합니다.");
+  //   }
+  // }, [router, user]);
 
   const hadleDeletPost = (postId: string) => {
     try {
@@ -198,7 +196,6 @@ export default function MypageSpaceDetail() {
           { postId },
           {
             onSuccess: () => {
-              setIsView(false);
               setSelectedPostId("");
               setIsOpenModal(!isOpenModal);
             },
@@ -210,51 +207,6 @@ export default function MypageSpaceDetail() {
       console.log(error);
     }
   };
-
-  // const handleSubmitPost = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   try {
-  //     EditPostMutation.mutate(
-  //       {
-  //         postId: postDetail?.postId,
-  //         postInfo,
-  //         content: html,
-  //       },
-  //       {
-  //         onSuccess: () => {
-  //           setIsEditing(false);
-  //           queryClient.invalidateQueries(["spacePostList"]);
-  //         },
-  //       }
-  //     );
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
-  // const handleFileChange = (
-  //   e: React.ChangeEvent<EventTarget & HTMLInputElement>
-  // ) => {
-  //   e.preventDefault();
-  //   const selectedFile = e.target.files;
-  //   //
-
-  //   setCustomLoading(true);
-  //   spaceArea && deleteOldImage(spaceArea.backgroundImage);
-  //   uploadBgImage.mutate(
-  //     { file: selectedFile, param: param.toString() },
-  //     {
-  //       onSuccess() {
-  //         setCustomLoading(false);
-  //         alert("사진이 변경되었습니다.");
-  //       },
-  //       onError() {
-  //         setCustomLoading(false);
-  //         alert("사진 변경에 실패하였습니다.");
-  //       },
-  //     }
-  //   );
-  // };
 
   const handleCriticState = () => {
     try {

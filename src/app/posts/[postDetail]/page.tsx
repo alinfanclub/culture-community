@@ -11,7 +11,11 @@ import Avvvatars from "avvvatars-react";
 import { useAuthContext } from "@/app/context/FirebaseAuthContext";
 import Image from "next/image";
 import SubmitBtn from "@/components/common/SubmitBtn";
-import { createComment, deleteComment, getCommentData } from "@/app/api/fireStoreComments";
+import {
+  createComment,
+  deleteComment,
+  getCommentData,
+} from "@/app/api/fireStoreComments";
 
 export default function PostDetailPage() {
   const queryClient = useQueryClient();
@@ -27,24 +31,32 @@ export default function PostDetailPage() {
   } = useQuery({
     queryKey: ["postDetail"],
     queryFn: () => getPostDetailData(param.toString()),
+    cacheTime: 0,
   });
 
-  const {data: commentsData = [], isLoading: commentLoading, isError: commentError} = useQuery({
+  const {
+    data: commentsData = [],
+    isLoading: commentLoading,
+    isError: commentError,
+  } = useQuery({
     queryKey: ["postDetailComments"],
     queryFn: () => getCommentData(param.toString()),
-  })
+  });
 
   const commentCreateMutation = useMutation(
-    ({postId, html }: { postId: string,html: string }) => createComment(postId,html), {
+    ({ postId, html }: { postId: string; html: string }) =>
+      createComment(postId, html),
+    {
       onSuccess: () => queryClient.invalidateQueries(["postDetailComments"]),
     }
-  )
+  );
 
   const commentDeleteMutation = useMutation(
-    ({commentId}: {commentId: string}) => deleteComment(commentId), {
+    ({ commentId }: { commentId: string }) => deleteComment(commentId),
+    {
       onSuccess: () => queryClient.invalidateQueries(["postDetailComments"]),
     }
-  )
+  );
 
   const handleHtmlChange = (html: string) => {
     setHtml(html);
@@ -55,14 +67,15 @@ export default function PostDetailPage() {
     e.preventDefault();
     const postId = param.toString();
 
-    if(!html || html === "" || html === "<p><br></p>") return alert('내용을 입력해주세요')
-    commentCreateMutation.mutate({postId, html})
-    setHtml("")
-  }
+    if (!html || html === "" || html === "<p><br></p>")
+      return alert("내용을 입력해주세요");
+    commentCreateMutation.mutate({ postId, html });
+    setHtml("");
+  };
 
   const handleCommentDelete = (commentId: string) => {
-    commentDeleteMutation.mutate({commentId})
-  }
+    commentDeleteMutation.mutate({ commentId });
+  };
 
   if (isLoading || commentLoading) return <ClipSpinner color="#fff" />;
   if (isError || commentError) return <div>error...</div>;
@@ -93,35 +106,41 @@ export default function PostDetailPage() {
             <>
               <div className="p-4 flex flex-col gap-4 w-full border-b-[1px] border-white">
                 <div>
-                  { user?.photoURL ? (
+                  {user?.photoURL ? (
                     <Image
                       src={user.photoURL}
                       alt="userImage"
                       width={500}
                       height={500}
-                      className='w-8 aspect-square rounded-full'
+                      className="w-8 aspect-square rounded-full"
                     />
                   ) : (
-                    <Avvvatars value={displayName && displayName} style="shape" />
+                    <Avvvatars
+                      value={displayName && displayName}
+                      style="shape"
+                    />
                   )}
                 </div>
                 <form onSubmit={handleCommnetCreate} className="w-full">
                   <div className="w-full flex flex-col itmes-end gap-4">
                     {user && (
                       <div className="h-full min-h-[20rem] xl:min-h-[10rem]  max-h-60 overflow-y-auto border border-white rounded-2xl px-4 pb-4">
-                      <QuillEditor
-                        html={html}
-                        handleHtmlChange={handleHtmlChange}
-                        placeholder={"여려분의 다양한 관점이 궁금해요"}
-                      />
-                    </div>
+                        <QuillEditor
+                          html={html}
+                          handleHtmlChange={handleHtmlChange}
+                          placeholder={"여려분의 다양한 관점이 궁금해요"}
+                        />
+                      </div>
                     )}
-                    {!user &&(
+                    {!user && (
                       <div className="h-full min-h-[20rem] xl:min-h-[10rem]  max-h-60 overflow-y-auto border border-white rounded-2xl px-4 pb-4 justify-center items-center flex">
-                       <p>비평은 로그인 후에 가능합니다</p>
-                    </div>
+                        <p>비평은 로그인 후에 가능합니다</p>
+                      </div>
                     )}
-                    <SubmitBtn text="비평 작성" style={`mx-0 ml-auto ${!user && "pointer-events-none"}`} />
+                    <SubmitBtn
+                      text="비평 작성"
+                      style={`mx-0 ml-auto ${!user && "pointer-events-none"}`}
+                    />
                   </div>
                 </form>
               </div>
@@ -129,35 +148,45 @@ export default function PostDetailPage() {
           )}
 
           <div className="py-4 xl:overflow-y-auto flex flex-col gap-4 divide-y divide-white">
-              {commentsData?.map((data, index) => (
-                <div key={index} className="flex flex-col gap-4 p-4">
-                  <div className='flex justify-between items-center'>
-                    <div>
-                    <div className='flex items-center gap-4'>
-                    {data.userInfos.photoURL ? (
-                      <Image
-                        src={data.userInfos.photoURL}
-                        alt="userImage"
-                        width={500}
-                        height={500}
-                        className='w-8 aspect-square rounded-full'
-                      />
-                    ) : (
-                      <Avvvatars value={data.userInfos.displayName} style="shape" />
-                    )}
-                    <p>{data.userInfos.displayName}</p>
-                  </div>
+            {commentsData?.map((data, index) => (
+              <div key={index} className="flex flex-col gap-4 p-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <div className="flex items-center gap-4">
+                      {data.userInfos.photoURL ? (
+                        <Image
+                          src={data.userInfos.photoURL}
+                          alt="userImage"
+                          width={500}
+                          height={500}
+                          className="w-8 aspect-square rounded-full"
+                        />
+                      ) : (
+                        <Avvvatars
+                          value={data.userInfos.displayName}
+                          style="shape"
+                        />
+                      )}
+                      <p>{data.userInfos.displayName}</p>
                     </div>
-                    {user?.uid === data.writer && (<div onClick={() => handleCommentDelete(data.commentId)} className='cursor-pointer'>x</div>)}
                   </div>
-                  <div className="flex flex-col gap-2">
+                  {user?.uid === data.writer && (
                     <div
-                      className="overflow-wrap break-words "
-                      dangerouslySetInnerHTML={{ __html: data.comment }}
-                    />
-                  </div>
+                      onClick={() => handleCommentDelete(data.commentId)}
+                      className="cursor-pointer"
+                    >
+                      x
+                    </div>
+                  )}
                 </div>
-              ))}
+                <div className="flex flex-col gap-2">
+                  <div
+                    className="overflow-wrap break-words "
+                    dangerouslySetInnerHTML={{ __html: data.comment }}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </section>
         <div
@@ -165,7 +194,7 @@ export default function PostDetailPage() {
           onClick={() => setIsView(!isView)}
         >
           <TfiMenuAlt />
-          <p>{commentsData? commentsData.length : "0"}</p>
+          <p>{commentsData ? commentsData.length : "0"}</p>
         </div>
       </article>
     </section>

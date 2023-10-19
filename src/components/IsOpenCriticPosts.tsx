@@ -1,9 +1,11 @@
-"use client"
+"use client";
 
 import { getOpenCriticPostList } from "@/app/api/fireStore";
 import { useQuery } from "react-query";
 import PostBlock from "./PostBlock";
 import Link from "next/link";
+import { formatAgo } from "@/app/util/timeago";
+import { timeStampFormat } from "@/app/util/timeStampFormat";
 
 export default function IsOpenCriticPosts() {
   const {
@@ -15,23 +17,35 @@ export default function IsOpenCriticPosts() {
     queryFn: () => getOpenCriticPostList(),
   });
 
-  console.log(openCriticPosts)
+  console.log(openCriticPosts);
 
   return (
-    <section>
-      <article className="grid grid-cols-2 h-auto gap-4 xl:flex py-2 xl:grow xl:h-full">
+    <section className="p-4">
+      <article className="grid grid-cols-2 h-auto gap-4 xl:grid-cols-5 py-2 xl:grow xl:h-full">
         {openCriticPosts?.map((data, index) => (
           <div
             key={index}
             onClick={() => {
               // setSelectedPostId(data.postId), setIsView(true);
             }}
+            className="bg-zinc-700 p-4 rounded-2xl"
           >
-            <Link href={{
-              pathname: `/posts/${data.postId}`,
-              query: { postId: data.postId },
-            }}>
-              <PostBlock data={data} key={index} />
+            <Link
+              href={{
+                pathname: `/posts/${data.postId}`,
+                query: { postId: data.postId },
+              }}
+              className="flex flex-col gap-4"
+            >
+              <h3 className="text-bold">{data.title}</h3>
+              <p
+                dangerouslySetInnerHTML={{ __html: data.content }}
+                className=" line-clamp-5 "
+              ></p>
+              <div className="flex justify-between">
+                <div>{data.author}</div>
+                <div>{formatAgo(timeStampFormat(data.createdAt))}</div>
+              </div>
             </Link>
           </div>
         ))}
@@ -39,4 +53,3 @@ export default function IsOpenCriticPosts() {
     </section>
   );
 }
-

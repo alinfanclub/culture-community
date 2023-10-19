@@ -1,7 +1,6 @@
 "use client";
 
 import { getSpaceData, makeSpace } from "@/app/api/fireStore";
-import UserWelcomMsg from "./UserWelcomMsg";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import SpaceBlock from "./SpaceBlock";
 import ClipSpinner from "./common/ClipSpinner";
@@ -54,29 +53,23 @@ export default function UserSpaceArea() {
     queryFn: () => getSpaceData(),
   });
 
-  useEffect(() => {
-    const authToken = Cookies.get("authToken");
-    if (authToken === undefined) {
-      router.push("/");
-      console.log("redirect");
-      alert("로그인이 필요합니다.");
-    }
-  }, [router, user]);
+  // useEffect(() => {
+  //   const authToken = Cookies.get("authToken");
+  //   if (authToken === undefined) {
+  //     router.push("/");
+  //     console.log("redirect");
+  //     alert("로그인이 필요합니다.");
+  //   }
+  // }, [router, user]);
 
   if (isLoading || customLoading) return <ClipSpinner color="#fff" />;
   if (isError) return <div>error</div>;
 
   return (
     <div className="text-white p-4  bg-zinc-900">
-      <div className="flex justify-between items-center flex-wrap">
-        <UserWelcomMsg />
-        <button type="button" onClick={() => handleMakeSpace()}>
-          스페이스추가
-        </button>
-      </div>
       <div className="xl:flex gap-4 py-2 flex-wrap justify-center xl:justify-start grid grid-cols-2">
         {spaceArea
-          .sort((a, b) => b.createdAt - a.createdAt)
+          .sort((a, b) => a.createdAt - b.createdAt)
           .map((data, index) => (
             <SpaceBlock data={data} key={index} order={index} />
           ))}

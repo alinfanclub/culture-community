@@ -1,23 +1,5 @@
-// "use client";
 
-// import { getPostDetailData } from "@/app/api/fireStore";
-// import ClipSpinner from "@/components/common/ClipSpinner";
-// import { useParams } from "next/navigation";
-// import { useEffect, useState } from "react";
-// import { useMutation, useQuery, useQueryClient } from "react-query";
-// import { TfiMenuAlt } from "react-icons/tfi";
-// import QuillEditor from "@/components/QuillEditor";
-// import Avvvatars from "avvvatars-react";
-// import { useAuthContext } from "@/app/context/FirebaseAuthContext";
-// import Image from "next/image";
-// import SubmitBtn from "@/components/common/SubmitBtn";
-// import {
-//   createComment,
-//   deleteComment,
-//   getCommentData,
-// } from "@/app/api/fireStoreComments";
 import PostDetailComment from "@/components/PostDetailComment";
-import { NextPageContext } from "next";
 export const checkEnvironment = () => {
   let base_url =
     process.env.NEXT_PUBLIC_ENV === "development"
@@ -33,7 +15,7 @@ async function getPostDetailData(postId: string) {
   return data;
 }
 
-export default async function PostDetailPage({params: {postDetail}}: {params: {postDetail: string}}) {
+async function PostDetailPage({params: {postDetail}}: {params: {postDetail: string}}) {
   const postDetailData = await getPostDetailData(postDetail);
 
 

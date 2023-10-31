@@ -11,7 +11,7 @@ const checkEnvironment = () => {
 };
 
 async function getPostDetailData(postId: string) {
-  const res = await fetch(checkEnvironment().concat(`/api/post/${postId}`));
+  const res = await fetch(checkEnvironment().concat(`/api/post/${postId}`), {cache: "no-cache"});
   const data = await res.json();
   return data;
 }

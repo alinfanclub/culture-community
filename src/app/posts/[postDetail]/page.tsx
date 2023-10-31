@@ -1,6 +1,7 @@
 
 import PostDetailComment from "@/components/PostDetailComment";
-export const checkEnvironment = () => {
+
+const checkEnvironment = () => {
   let base_url =
     process.env.NEXT_PUBLIC_ENV === "development"
       ? "http://localhost:3000"
@@ -15,7 +16,7 @@ async function getPostDetailData(postId: string) {
   return data;
 }
 
-async function PostDetailPage({params: {postDetail}}: {params: {postDetail: string}}) {
+export default async function PostDetailPage({params: {postDetail}}: {params: {postDetail: string}}) {
   const postDetailData = await getPostDetailData(postDetail);
 
 

@@ -61,7 +61,7 @@ export default function PostBlock({
           <div className="flex gap-2 items-center">
             <small>{data.author}</small>
             <span>-</span>
-            <small>{formatAgo(timeStampFormat(data.createdAt))}</small>
+            <small>{formatAgo(data.createdAt)}</small>
           </div>
         </div>
         {displayState && (

@@ -1,12 +1,31 @@
 "use client";
 
-import { PropsWithChildren, useState } from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
+import React from "react";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-export default function ReactQueryProvider({ children }: PropsWithChildren) {
-  const [queryClient] = useState(() => new QueryClient());
+type Props = {
+  children: React.ReactNode;
+};
+
+function Providers({ children }: Props) {
+  const [client] = React.useState(
+    new QueryClient({  
+      defaultOptions: {  // react-query 전역 설정
+        queries: {
+          refetchOnWindowFocus: false,
+          retry: false,
+        },
+      },
+    })
+  );
+
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={client}>
+      {children}
+      <ReactQueryDevtools />
+    </QueryClientProvider>
   );
 }
+
+export default Providers;

@@ -1,13 +1,15 @@
 "use client";
 
 import { getSpaceData, makeSpace } from "@/app/api/fireStore";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import SpaceBlock from "./SpaceBlock";
 import ClipSpinner from "./common/ClipSpinner";
 import { use, useEffect, useState } from "react";
 import { useAuthContext } from "@/app/context/FirebaseAuthContext";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import getQueryClient from "@/app/provider/GetQueryClient";
+import { QueryClient } from "@tanstack/react-query";
 
 export default function UserSpaceArea() {
   const queryClient = useQueryClient();
@@ -16,9 +18,12 @@ export default function UserSpaceArea() {
   const router = useRouter();
 
   const uploadNewPost = useMutation(
-    ({ spaceName }: { spaceName: string }) => makeSpace(spaceName),
+    
     {
-      onSuccess: () => queryClient.invalidateQueries(["spaceArea"]),
+      mutationFn: ({ spaceName }: { spaceName: string }) => makeSpace(spaceName),
+      onSuccess: () => queryClient.invalidateQueries({
+        queryKey: ["spaceArea"],
+      })
     }
   );
 

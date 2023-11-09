@@ -13,7 +13,7 @@ import { DocumentData } from "firebase/firestore";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 type index = {
   order: number;
 };
@@ -21,7 +21,6 @@ export default function SpaceBlock({ data, order }: DocumentData & index) {
   const queryClient = useQueryClient();
   const [isOpenModal, setIsOpenModal] = useState(false);
   const ModalElement = useRef<HTMLDivElement>(null);
-  const time = timeStampFormat(data.createdAt);
   const [modalStyle, setModalStyle] = useState({});
   const handleSpaceDelete = async () => {
     if (
@@ -34,10 +33,12 @@ export default function SpaceBlock({ data, order }: DocumentData & index) {
   const { user } = useAuthContext();
 
   const uploadBgImage = useMutation(
-    ({ file, param }: { file: any; param: string }) =>
-      userSpaceBgUpdate(file, param),
     {
-      onSuccess: () => queryClient.invalidateQueries(["spaceArea"]),
+      mutationFn: ({ file, param }: { file: any; param: string }) =>
+      userSpaceBgUpdate(file, param),
+      onSuccess: () => queryClient.invalidateQueries({
+        queryKey: ["spaceArea"],
+      })
     }
   );
 
@@ -102,7 +103,7 @@ export default function SpaceBlock({ data, order }: DocumentData & index) {
           <div className="flex gap-2 items-center">
             <small>{data.userInfos.displayName}</small>
             <span>-</span>
-            <small>{formatAgo(time)}</small>
+            <small>{formatAgo(data.createdAt)}</small>
           </div>
         </div>
       </article>

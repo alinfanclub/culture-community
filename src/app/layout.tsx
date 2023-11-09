@@ -7,6 +7,7 @@ import { FirebaseAuthProvider } from "./context/FirebaseAuthContext";
 import Script from "next/script";
 import ReactQueryProvider from "./provider/ReactQueryProvider";
 import "react-quill/dist/quill.snow.css";
+import Providers from "./provider/ReactQueryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -38,7 +39,7 @@ export default function RootLayout({
             </nav>
           </header>
           <div className="h-calc-body pt-[48px]  text-white bg-zinc-900">
-            <ReactQueryProvider>{children}</ReactQueryProvider>
+            <Providers>{children}</Providers>
           </div>
         </FirebaseAuthProvider>
       </body>

@@ -1,11 +1,12 @@
 "use client";
 
 import { getOpenCriticPostList } from "@/app/api/fireStore";
-import { useQuery } from "react-query";
+
 import PostBlock from "./PostBlock";
 import Link from "next/link";
 import { formatAgo } from "@/app/util/timeago";
 import { timeStampFormat } from "@/app/util/timeStampFormat";
+import { useQuery } from "@tanstack/react-query";
 
 export default function IsOpenCriticPosts() {
   const {
@@ -38,13 +39,13 @@ export default function IsOpenCriticPosts() {
               className="flex flex-col gap-4"
             >
               <h3 className="text-bold">{data.title}</h3>
-              <p
+              <div
                 dangerouslySetInnerHTML={{ __html: data.content }}
                 className=" line-clamp-5 "
-              ></p>
+              ></div>
               <div className="flex justify-between">
                 <div>{data.author}</div>
-                <div>{formatAgo(timeStampFormat(data.createdAt))}</div>
+                <div>{formatAgo(data.createdAt)}</div>
               </div>
             </Link>
           </div>

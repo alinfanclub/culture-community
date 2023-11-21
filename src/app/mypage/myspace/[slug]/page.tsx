@@ -21,7 +21,7 @@ import ClipSpinner from "@/components/common/ClipSpinner";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import PostBlock from "@/components/PostBlock";
 import QuillEditor from "@/components/QuillEditor";
@@ -56,7 +56,7 @@ export default function MypageSpaceDetail() {
   } = useQuery({
     queryKey: ["spaceAreaDetail"],
     queryFn: () => getSpaceDataDetail(param.toString()),
-    cacheTime: 0,
+    refetchOnWindowFocus: false,
   });
 
   const {
@@ -74,13 +74,14 @@ export default function MypageSpaceDetail() {
     isError: postDetailError,
   } = useQuery({
     queryKey: ["spacePostList", selectedPostId],
-    queryFn: () => getPostDetailData(selectedPostId),
-    enabled: !!setSelectedPostId,
-    onSuccess(data) {
-      setPostInfo({ title: data.title, name: data.author });
-      setHtml(data.content);
-    },
-  });
+    queryFn: () => getPostDetailData(selectedPostId).then((res) => {
+      setPostInfo({ title: res.title, name: res.author });
+      setHtml(res.content);
+      return res;
+    }),
+    enabled: !!selectedPostId,
+    
+  },);
 
   const {
     data: commentsData = [],
@@ -93,9 +94,12 @@ export default function MypageSpaceDetail() {
   });
 
   const deletePostMutation = useMutation(
-    ({ postId }: { postId: string }) => deletePost(postId),
+   
     {
-      onSuccess: () => queryClient.invalidateQueries(["spacePostList"]),
+      mutationFn: ({ postId }: { postId: string }) => deletePost(postId),
+      onSuccess: () => queryClient.invalidateQueries({
+        queryKey: ["spacePostList"],
+      })
     }
   );
 
@@ -123,32 +127,42 @@ export default function MypageSpaceDetail() {
   // );
 
   const SpaceTitleFixMutaion = useMutation(
-    ({ param, title }: { param: string; title: string }) =>
-      updateSPaceName(param, title),
     {
-      onSuccess: () => queryClient.invalidateQueries(["spaceAreaDetail"]),
+      mutationFn: ({ param, title }: { param: string; title: string }) =>
+        updateSPaceName(param, title),
+      onSuccess: () => queryClient.invalidateQueries({
+        queryKey: ["spaceAreaDetail"],
+      })
     }
   );
   const CriticSateMutation = useMutation(
-    ({ postId, state }: { postId: string; state: boolean }) =>
-      updateCriticState(postId, state),
-    {
-      onSuccess: () => queryClient.invalidateQueries(["spacePostList"]),
+   
+    { mutationFn:  ({ postId, state }: { postId: string; state: boolean }) =>
+    updateCriticState(postId, state),
+    onSuccess: () => queryClient.invalidateQueries({
+      queryKey: ["spacePostList"],
+    })
     }
   );
 
   const commentDeleteMutation = useMutation(
-    ({ commentId }: { commentId: string }) => deleteComment(commentId),
+   
     {
-      onSuccess: () => queryClient.invalidateQueries(["postDetailComments"]),
+      mutationFn:  ({ commentId }: { commentId: string }) => deleteComment(commentId),
+      onSuccess: () => queryClient.invalidateQueries({
+        queryKey: ["postDetailComments"],
+      })
     }
   );
 
   const createPostMutaition = useMutation(
-    ({ param, imgQuery }: { param: string; imgQuery?: string }) =>
-      createPostContentOnly(param, imgQuery),
     {
-      onSuccess: () => queryClient.invalidateQueries(["spacePostList"]),
+      mutationFn: 
+      ({ param, imgQuery }: { param: string; imgQuery?: string }) =>
+        createPostContentOnly(param, imgQuery),
+        onSuccess: () => queryClient.invalidateQueries({
+          queryKey: ["spacePostList"],
+        })
     }
   );
 
@@ -166,18 +180,22 @@ export default function MypageSpaceDetail() {
   };
 
   const updateTitleMutation = useMutation(
-    ({
-      postId,
-      postInfo,
-    }: {
-      postId: string;
-      postInfo: { title: string; name: string };
-    }) => updateTitle(postId, postInfo)
+    {
+      mutationFn:({
+        postId,
+        postInfo,
+      }: {
+        postId: string;
+        postInfo: { title: string; name: string };
+      }) => updateTitle(postId, postInfo)
+    }
   );
 
   const updateContentMutation = useMutation(
-    ({ postId, content }: { postId: string; content: string }) =>
+    {
+      mutationFn: ({ postId, content }: { postId: string; content: string }) =>
       updatePostContentOnly(postId, content)
+    }
   );
 
   // useEffect(() => {
@@ -277,7 +295,10 @@ export default function MypageSpaceDetail() {
   };
 
   const handlePostInfoBlur = () => {
-    queryClient.invalidateQueries(["spacePostList"]);
+
+    queryClient.invalidateQueries({
+      queryKey: ["spacePostList"],
+    });
   };
 
   // ~ 수정하기 데이터 상태 저장
@@ -343,9 +364,9 @@ export default function MypageSpaceDetail() {
                   </h1>
                 )}
                 <div className="flex gap-4 items-end">
-                  <p>{timeStampFormat(spaceArea.createdAt)}</p>
+                  <p>{formatAgo(spaceArea.createdAt)}</p>
                   <small>
-                    {formatAgo(timeStampFormat(spaceArea.createdAt))}
+                    {formatAgo(spaceArea.createdAt)}
                   </small>
                 </div>
               </div>

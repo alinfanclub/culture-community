@@ -6,11 +6,13 @@ import Avvvatars from "avvvatars-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import {  } from "react-query";
 import QuillEditor from "./QuillEditor";
 import SubmitBtn from "./common/SubmitBtn";
 import { TfiMenuAlt } from "react-icons/tfi";
 import { DocumentData } from "firebase/firestore";
+import { useQuery, useMutation, useQueryClient, QueryClient } from "@tanstack/react-query";
+import getQueryClient from "@/app/provider/GetQueryClient";
 
 
 export default function PostDetailComment({ postDetail }: { postDetail: DocumentData }) {
@@ -31,18 +33,23 @@ export default function PostDetailComment({ postDetail }: { postDetail: Document
   });
 
   const commentCreateMutation = useMutation(
-    ({ postId, html }: { postId: string; html: string }) =>
-      createComment(postId, html),
     {
-      onSuccess: () => queryClient.invalidateQueries(["postDetailComments"]),
-    }
+      mutationFn: ({ postId, html }: { postId: string; html: string }) =>
+        createComment(postId, html),
+      onSuccess: () => queryClient.invalidateQueries({
+        queryKey: ["postDetailComments"],
+      })
+    },
   );
 
   const commentDeleteMutation = useMutation(
-    ({ commentId }: { commentId: string }) => deleteComment(commentId),
     {
-      onSuccess: () => queryClient.invalidateQueries(["postDetailComments"]),
-    }
+      mutationFn: ({ commentId }: { commentId: string}) =>
+        deleteComment(commentId),
+      onSuccess: () => queryClient.invalidateQueries({
+        queryKey: ["postDetailComments"],
+      })
+    },
   );
 
   const handleHtmlChange = (html: string) => {
@@ -56,7 +63,11 @@ export default function PostDetailComment({ postDetail }: { postDetail: Document
 
     if (!html || html === "" || html === "<p><br></p>")
       return alert("내용을 입력해주세요");
-    commentCreateMutation.mutate({ postId, html });
+    commentCreateMutation.mutate({ postId, html },{
+      onSuccess: () => queryClient.invalidateQueries({
+        queryKey: ["postDetailComments"],
+      })
+    });
     setHtml("");
   };
 

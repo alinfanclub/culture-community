@@ -7,7 +7,7 @@ export default async function HydrateOpenPost() {
   const queryClient = getQueryClient()
   await queryClient.prefetchQuery({
     queryKey: ['openCriticPosts'],
-    queryFn: () => getOpenCriticPostList(),
+    queryFn: () => getOpenCriticPostList().then((res) => JSON.parse(JSON.stringify(res))),
   })
   const dehydratedState = dehydrate(queryClient)
 

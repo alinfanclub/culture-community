@@ -18,8 +18,6 @@ export default function IsOpenCriticPosts() {
     queryFn: () => getOpenCriticPostList(),
   });
 
-  console.log(openCriticPosts);
-
   return (
     <section className="p-4">
       <article className="grid grid-cols-2 h-auto gap-4 xl:grid-cols-5 py-2 xl:grow xl:h-full">

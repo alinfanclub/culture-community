@@ -7,8 +7,9 @@ export default async function HydratedPosts({postId}: {postId: string}) {
   const queryClient = getQueryClient()
   await queryClient.prefetchQuery({
     queryKey: ['postDetail'],
-    queryFn: () => getPostDetailData(postId),
+    queryFn: () => getPostDetailData(postId).then((res) => JSON.parse(JSON.stringify(res))),
   })
+
   const dehydratedState = dehydrate(queryClient)
 
   return (

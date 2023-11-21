@@ -28,7 +28,7 @@ export default function RootLayout({
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0" />
         <Script src={KAKAO_SDK_URL} strategy="beforeInteractive" />
       </head>
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         <FirebaseAuthProvider>
           <header className="w-full flex justify-between p-2 items-center h-[48px] min-h-[48px]  xl:h-[48px] fixed top-0 z-[15] bg-white">
             <h1>
